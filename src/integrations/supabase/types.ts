@@ -14,7 +14,162 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      equipment: {
+        Row: {
+          asset_tag: string | null
+          assigned_to: string | null
+          brand: string
+          created_at: string
+          created_by: string | null
+          id: string
+          location_branch: string
+          location_department: string
+          location_room: string
+          model: string
+          notes: string | null
+          serial_number: string | null
+          status: Database["public"]["Enums"]["equipment_status"]
+          type: Database["public"]["Enums"]["equipment_type"]
+          updated_at: string
+        }
+        Insert: {
+          asset_tag?: string | null
+          assigned_to?: string | null
+          brand?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location_branch?: string
+          location_department?: string
+          location_room?: string
+          model?: string
+          notes?: string | null
+          serial_number?: string | null
+          status?: Database["public"]["Enums"]["equipment_status"]
+          type: Database["public"]["Enums"]["equipment_type"]
+          updated_at?: string
+        }
+        Update: {
+          asset_tag?: string | null
+          assigned_to?: string | null
+          brand?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location_branch?: string
+          location_department?: string
+          location_room?: string
+          model?: string
+          notes?: string | null
+          serial_number?: string | null
+          status?: Database["public"]["Enums"]["equipment_status"]
+          type?: Database["public"]["Enums"]["equipment_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      equipment_movements: {
+        Row: {
+          created_at: string
+          equipment_id: string
+          from_location: string | null
+          from_person: string | null
+          id: string
+          moved_by: string | null
+          notes: string | null
+          to_location: string | null
+          to_person: string | null
+        }
+        Insert: {
+          created_at?: string
+          equipment_id: string
+          from_location?: string | null
+          from_person?: string | null
+          id?: string
+          moved_by?: string | null
+          notes?: string | null
+          to_location?: string | null
+          to_person?: string | null
+        }
+        Update: {
+          created_at?: string
+          equipment_id?: string
+          from_location?: string | null
+          from_person?: string | null
+          id?: string
+          moved_by?: string | null
+          notes?: string | null
+          to_location?: string | null
+          to_person?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_movements_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_movements_from_person_fkey"
+            columns: ["from_person"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_movements_to_person_fkey"
+            columns: ["to_person"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          department: string
+          email: string
+          full_name: string
+          id: string
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          department?: string
+          email?: string
+          full_name?: string
+          id?: string
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          department?: string
+          email?: string
+          full_name?: string
+          id?: string
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +178,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      equipment_status: "active" | "maintenance" | "inactive"
+      equipment_type: "notebook" | "monitor" | "router" | "camera" | "printer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +306,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      equipment_status: ["active", "maintenance", "inactive"],
+      equipment_type: ["notebook", "monitor", "router", "camera", "printer"],
+    },
   },
 } as const
