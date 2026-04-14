@@ -11,10 +11,17 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as MovementsRouteImport } from './routes/movements'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EquipmentRoutersRouteImport } from './routes/equipment/routers'
+import { Route as EquipmentPrintersRouteImport } from './routes/equipment/printers'
+import { Route as EquipmentNotebooksRouteImport } from './routes/equipment/notebooks'
+import { Route as EquipmentMonitorsRouteImport } from './routes/equipment/monitors'
+import { Route as EquipmentCamerasRouteImport } from './routes/equipment/cameras'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -24,6 +31,16 @@ const SignupRoute = SignupRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MovementsRoute = MovementsRouteImport.update({
+  id: '/movements',
+  path: '/movements',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -46,22 +63,61 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EquipmentRoutersRoute = EquipmentRoutersRouteImport.update({
+  id: '/equipment/routers',
+  path: '/equipment/routers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EquipmentPrintersRoute = EquipmentPrintersRouteImport.update({
+  id: '/equipment/printers',
+  path: '/equipment/printers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EquipmentNotebooksRoute = EquipmentNotebooksRouteImport.update({
+  id: '/equipment/notebooks',
+  path: '/equipment/notebooks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EquipmentMonitorsRoute = EquipmentMonitorsRouteImport.update({
+  id: '/equipment/monitors',
+  path: '/equipment/monitors',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EquipmentCamerasRoute = EquipmentCamerasRouteImport.update({
+  id: '/equipment/cameras',
+  path: '/equipment/cameras',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/movements': typeof MovementsRoute
+  '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/equipment/cameras': typeof EquipmentCamerasRoute
+  '/equipment/monitors': typeof EquipmentMonitorsRoute
+  '/equipment/notebooks': typeof EquipmentNotebooksRoute
+  '/equipment/printers': typeof EquipmentPrintersRoute
+  '/equipment/routers': typeof EquipmentRoutersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/movements': typeof MovementsRoute
+  '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/equipment/cameras': typeof EquipmentCamerasRoute
+  '/equipment/monitors': typeof EquipmentMonitorsRoute
+  '/equipment/notebooks': typeof EquipmentNotebooksRoute
+  '/equipment/printers': typeof EquipmentPrintersRoute
+  '/equipment/routers': typeof EquipmentRoutersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -69,8 +125,15 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/movements': typeof MovementsRoute
+  '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/equipment/cameras': typeof EquipmentCamerasRoute
+  '/equipment/monitors': typeof EquipmentMonitorsRoute
+  '/equipment/notebooks': typeof EquipmentNotebooksRoute
+  '/equipment/printers': typeof EquipmentPrintersRoute
+  '/equipment/routers': typeof EquipmentRoutersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -79,24 +142,45 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/login'
+    | '/movements'
+    | '/profile'
     | '/reset-password'
     | '/signup'
+    | '/equipment/cameras'
+    | '/equipment/monitors'
+    | '/equipment/notebooks'
+    | '/equipment/printers'
+    | '/equipment/routers'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/dashboard'
     | '/forgot-password'
     | '/login'
+    | '/movements'
+    | '/profile'
     | '/reset-password'
     | '/signup'
+    | '/equipment/cameras'
+    | '/equipment/monitors'
+    | '/equipment/notebooks'
+    | '/equipment/printers'
+    | '/equipment/routers'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
     | '/forgot-password'
     | '/login'
+    | '/movements'
+    | '/profile'
     | '/reset-password'
     | '/signup'
+    | '/equipment/cameras'
+    | '/equipment/monitors'
+    | '/equipment/notebooks'
+    | '/equipment/printers'
+    | '/equipment/routers'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -104,8 +188,15 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  MovementsRoute: typeof MovementsRoute
+  ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  EquipmentCamerasRoute: typeof EquipmentCamerasRoute
+  EquipmentMonitorsRoute: typeof EquipmentMonitorsRoute
+  EquipmentNotebooksRoute: typeof EquipmentNotebooksRoute
+  EquipmentPrintersRoute: typeof EquipmentPrintersRoute
+  EquipmentRoutersRoute: typeof EquipmentRoutersRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -122,6 +213,20 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/movements': {
+      id: '/movements'
+      path: '/movements'
+      fullPath: '/movements'
+      preLoaderRoute: typeof MovementsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -152,6 +257,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/equipment/routers': {
+      id: '/equipment/routers'
+      path: '/equipment/routers'
+      fullPath: '/equipment/routers'
+      preLoaderRoute: typeof EquipmentRoutersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/equipment/printers': {
+      id: '/equipment/printers'
+      path: '/equipment/printers'
+      fullPath: '/equipment/printers'
+      preLoaderRoute: typeof EquipmentPrintersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/equipment/notebooks': {
+      id: '/equipment/notebooks'
+      path: '/equipment/notebooks'
+      fullPath: '/equipment/notebooks'
+      preLoaderRoute: typeof EquipmentNotebooksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/equipment/monitors': {
+      id: '/equipment/monitors'
+      path: '/equipment/monitors'
+      fullPath: '/equipment/monitors'
+      preLoaderRoute: typeof EquipmentMonitorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/equipment/cameras': {
+      id: '/equipment/cameras'
+      path: '/equipment/cameras'
+      fullPath: '/equipment/cameras'
+      preLoaderRoute: typeof EquipmentCamerasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -160,8 +300,15 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  MovementsRoute: MovementsRoute,
+  ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  EquipmentCamerasRoute: EquipmentCamerasRoute,
+  EquipmentMonitorsRoute: EquipmentMonitorsRoute,
+  EquipmentNotebooksRoute: EquipmentNotebooksRoute,
+  EquipmentPrintersRoute: EquipmentPrintersRoute,
+  EquipmentRoutersRoute: EquipmentRoutersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
