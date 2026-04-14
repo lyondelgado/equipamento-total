@@ -1,0 +1,204 @@
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { EquipmentForm } from "@/components/EquipmentForm";
+import { EquipmentDetail } from "@/components/EquipmentDetail";
+import { Plus, Search, Pencil, Trash2, Eye } from "lucide-react";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import type { Tables, Enums } from "@/integrations/supabase/types";
+
+type Equipment = Tables<"equipment"> & { profiles?: { full_name: string } | null };
+type EquipmentType = Enums<"equipment_type">;
+
+const statusLabels: Record<string, string> = {
+  active: "Ativo",
+  maintenance: "Manutenção",
+  inactive: "Desativado",
+};
+
+const statusColors: Record<string, string> = {
+  active: "bg-success text-success-foreground",
+  maintenance: "bg-warning text-warning-foreground",
+  inactive: "bg-destructive text-destructive-foreground",
+};
+
+interface EquipmentListProps {
+  type: EquipmentType;
+  title: string;
+}
+
+export function EquipmentList({ type, title }: EquipmentListProps) {
+  const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<Equipment | null>(null);
+  const [viewing, setViewing] = useState<Equipment | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const fetchEquipment = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("equipment")
+      .select("*, profiles(full_name)")
+      .eq("type", type)
+      .order("created_at", { ascending: false });
+    if (error) {
+      toast.error("Erro ao carregar equipamentos");
+    } else {
+      setEquipment(data || []);
+    }
+    setLoading(false);
+  }, [type]);
+
+  useEffect(() => { fetchEquipment(); }, [fetchEquipment]);
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    const { error } = await supabase.from("equipment").delete().eq("id", deleteId);
+    if (error) {
+      toast.error("Erro ao excluir");
+    } else {
+      toast.success("Equipamento excluído");
+      fetchEquipment();
+    }
+    setDeleteId(null);
+  };
+
+  const filtered = equipment.filter((e) => {
+    const q = search.toLowerCase();
+    return (
+      e.brand.toLowerCase().includes(q) ||
+      e.model.toLowerCase().includes(q) ||
+      (e.serial_number || "").toLowerCase().includes(q) ||
+      (e.asset_tag || "").toLowerCase().includes(q) ||
+      (e.profiles?.full_name || "").toLowerCase().includes(q)
+    );
+  });
+
+  return (
+    <>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-xl">{title}</CardTitle>
+          <Button onClick={() => { setEditing(null); setFormOpen(true); }}>
+            <Plus className="h-4 w-4 mr-2" /> Novo
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-2 mb-4">
+            <Search className="h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por marca, modelo, série, patrimônio ou responsável..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="max-w-md"
+            />
+          </div>
+          {loading ? (
+            <div className="text-center py-8 text-muted-foreground">Carregando...</div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              {search ? "Nenhum resultado encontrado" : "Nenhum equipamento cadastrado"}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Marca / Modelo</TableHead>
+                    <TableHead>Patrimônio</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Localização</TableHead>
+                    <TableHead>Responsável</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>
+                        <div className="font-medium">{item.brand}</div>
+                        <div className="text-sm text-muted-foreground">{item.model}</div>
+                      </TableCell>
+                      <TableCell>{item.asset_tag || "—"}</TableCell>
+                      <TableCell>
+                        <Badge className={statusColors[item.status] || ""}>
+                          {statusLabels[item.status]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          {[item.location_branch, item.location_department, item.location_room].filter(Boolean).join(" / ") || "—"}
+                        </div>
+                      </TableCell>
+                      <TableCell>{item.profiles?.full_name || "—"}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => setViewing(item)}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => { setEditing(item); setFormOpen(true); }}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => setDeleteId(item.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <EquipmentForm
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        onSaved={fetchEquipment}
+        equipmentType={type}
+        equipment={editing}
+      />
+
+      {viewing && (
+        <EquipmentDetail
+          open={!!viewing}
+          onClose={() => setViewing(null)}
+          equipment={viewing}
+        />
+      )}
+
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir equipamento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. O equipamento e todo o histórico de movimentações serão removidos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Excluir</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
