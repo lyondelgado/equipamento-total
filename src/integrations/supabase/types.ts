@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      employees: {
+        Row: {
+          branch: string | null
+          cpf: string | null
+          created_at: string
+          created_by: string | null
+          department: string | null
+          email: string
+          full_name: string
+          hire_date: string | null
+          id: string
+          linked_user_id: string | null
+          notes: string | null
+          phone: string | null
+          position: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          branch?: string | null
+          cpf?: string | null
+          created_at?: string
+          created_by?: string | null
+          department?: string | null
+          email?: string
+          full_name?: string
+          hire_date?: string | null
+          id?: string
+          linked_user_id?: string | null
+          notes?: string | null
+          phone?: string | null
+          position?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          branch?: string | null
+          cpf?: string | null
+          created_at?: string
+          created_by?: string | null
+          department?: string | null
+          email?: string
+          full_name?: string
+          hire_date?: string | null
+          id?: string
+          linked_user_id?: string | null
+          notes?: string | null
+          phone?: string | null
+          position?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       equipment: {
         Row: {
           asset_tag: string | null
@@ -170,14 +224,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "funcionario" | "administrador" | "visitante"
       equipment_status: "active" | "maintenance" | "inactive"
       equipment_type: "notebook" | "monitor" | "router" | "camera" | "printer"
     }
@@ -307,6 +386,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["funcionario", "administrador", "visitante"],
       equipment_status: ["active", "maintenance", "inactive"],
       equipment_type: ["notebook", "monitor", "router", "camera", "printer"],
     },

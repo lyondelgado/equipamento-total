@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   ArrowLeftRight,
   User,
+  Users,
   LogOut,
 } from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
@@ -39,6 +40,7 @@ const equipmentItems = [
 ];
 
 const managementItems = [
+  { title: "Funcionários", url: "/employees", icon: Users },
   { title: "Movimentações", url: "/movements", icon: ArrowLeftRight },
   { title: "Perfil", url: "/profile", icon: User },
 ];
