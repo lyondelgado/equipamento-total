@@ -76,11 +76,14 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          invoice_number: string | null
           location_branch: string
           location_department: string
           location_room: string
           model: string
           notes: string | null
+          processor: string | null
+          purchase_date: string | null
           serial_number: string | null
           status: Database["public"]["Enums"]["equipment_status"]
           type: Database["public"]["Enums"]["equipment_type"]
@@ -93,11 +96,14 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          invoice_number?: string | null
           location_branch?: string
           location_department?: string
           location_room?: string
           model?: string
           notes?: string | null
+          processor?: string | null
+          purchase_date?: string | null
           serial_number?: string | null
           status?: Database["public"]["Enums"]["equipment_status"]
           type: Database["public"]["Enums"]["equipment_type"]
@@ -110,11 +116,14 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          invoice_number?: string | null
           location_branch?: string
           location_department?: string
           location_room?: string
           model?: string
           notes?: string | null
+          processor?: string | null
+          purchase_date?: string | null
           serial_number?: string | null
           status?: Database["public"]["Enums"]["equipment_status"]
           type?: Database["public"]["Enums"]["equipment_type"]
@@ -257,7 +266,7 @@ export type Database = {
     }
     Enums: {
       app_role: "funcionario" | "administrador" | "visitante"
-      equipment_status: "active" | "maintenance" | "inactive"
+      equipment_status: "active" | "maintenance" | "inactive" | "discarded"
       equipment_type: "notebook" | "monitor" | "router" | "camera" | "printer"
     }
     CompositeTypes: {
@@ -387,7 +396,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["funcionario", "administrador", "visitante"],
-      equipment_status: ["active", "maintenance", "inactive"],
+      equipment_status: ["active", "maintenance", "inactive", "discarded"],
       equipment_type: ["notebook", "monitor", "router", "camera", "printer"],
     },
   },
