@@ -168,6 +168,19 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
             </div>
           </div>
           <div className="space-y-2">
+            <Label>Processador</Label>
+            <Input value={processor} onChange={(e) => setProcessor(e.target.value)} placeholder="Ex: Intel Core i5-1135G7" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Nota Fiscal</Label>
+              <Input value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Data de Compra</Label>
+              <Input type="date" value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)} />
+            </div>
+          <div className="space-y-2">
             <Label>Status</Label>
             <Select value={status} onValueChange={(v) => setStatus(v as EquipmentStatus)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
