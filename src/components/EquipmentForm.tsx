@@ -70,10 +70,14 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
         setLocationRoom(equipment.location_room);
         setAssignedTo(equipment.assigned_to || "");
         setNotes(equipment.notes || "");
+        setInvoiceNumber(equipment.invoice_number || "");
+        setPurchaseDate(equipment.purchase_date || "");
+        setProcessor(equipment.processor || "");
       } else {
         setBrand(""); setModel(""); setSerialNumber(""); setAssetTag("");
         setStatus("active"); setLocationBranch(""); setLocationDepartment("");
         setLocationRoom(""); setAssignedTo(""); setNotes("");
+        setInvoiceNumber(""); setPurchaseDate(""); setProcessor("");
       }
     }
   }, [open, equipment]);
