@@ -101,6 +101,9 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
       location_room: locationRoom.trim(),
       assigned_to: assignedTo || null,
       notes: notes.trim() || null,
+      invoice_number: invoiceNumber.trim() || null,
+      purchase_date: purchaseDate || null,
+      processor: processor.trim() || null,
       created_by: user?.id || null,
     };
 
