@@ -31,6 +31,7 @@ const statusLabels: Record<EquipmentStatus, string> = {
   active: "Ativo",
   maintenance: "Manutenção",
   inactive: "Desativado",
+  discarded: "Descartado",
 };
 
 export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment }: EquipmentFormProps) {
@@ -47,6 +48,9 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
   const [locationRoom, setLocationRoom] = useState("");
   const [assignedTo, setAssignedTo] = useState<string>("");
   const [notes, setNotes] = useState("");
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [purchaseDate, setPurchaseDate] = useState("");
+  const [processor, setProcessor] = useState("");
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [saving, setSaving] = useState(false);
 
@@ -66,10 +70,14 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
         setLocationRoom(equipment.location_room);
         setAssignedTo(equipment.assigned_to || "");
         setNotes(equipment.notes || "");
+        setInvoiceNumber(equipment.invoice_number || "");
+        setPurchaseDate(equipment.purchase_date || "");
+        setProcessor(equipment.processor || "");
       } else {
         setBrand(""); setModel(""); setSerialNumber(""); setAssetTag("");
         setStatus("active"); setLocationBranch(""); setLocationDepartment("");
         setLocationRoom(""); setAssignedTo(""); setNotes("");
+        setInvoiceNumber(""); setPurchaseDate(""); setProcessor("");
       }
     }
   }, [open, equipment]);
@@ -93,6 +101,9 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
       location_room: locationRoom.trim(),
       assigned_to: assignedTo || null,
       notes: notes.trim() || null,
+      invoice_number: invoiceNumber.trim() || null,
+      purchase_date: purchaseDate || null,
+      processor: processor.trim() || null,
       created_by: user?.id || null,
     };
 
@@ -154,6 +165,20 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
             <div className="space-y-2">
               <Label>Patrimônio</Label>
               <Input value={assetTag} onChange={(e) => setAssetTag(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Processador</Label>
+            <Input value={processor} onChange={(e) => setProcessor(e.target.value)} placeholder="Ex: Intel Core i5-1135G7" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Nota Fiscal</Label>
+              <Input value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Data de Compra</Label>
+              <Input type="date" value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)} />
             </div>
           </div>
           <div className="space-y-2">

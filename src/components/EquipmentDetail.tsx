@@ -22,6 +22,7 @@ const statusLabels: Record<string, string> = {
   active: "Ativo",
   maintenance: "Manutenção",
   inactive: "Desativado",
+  discarded: "Descartado",
 };
 
 export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; onClose: () => void; equipment: Equipment }) {
@@ -61,7 +62,10 @@ export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; o
             <div><span className="text-muted-foreground">Nº Série:</span> {equipment.serial_number || "—"}</div>
             <div><span className="text-muted-foreground">Patrimônio:</span> {equipment.asset_tag || "—"}</div>
             <div><span className="text-muted-foreground">Status:</span> <Badge variant="outline">{statusLabels[equipment.status]}</Badge></div>
-            <div><span className="text-muted-foreground">Localização:</span> {[equipment.location_branch, equipment.location_department, equipment.location_room].filter(Boolean).join(" / ") || "—"}</div>
+            <div><span className="text-muted-foreground">Processador:</span> {equipment.processor || "—"}</div>
+            <div><span className="text-muted-foreground">Nota Fiscal:</span> {equipment.invoice_number || "—"}</div>
+            <div><span className="text-muted-foreground">Data Compra:</span> {equipment.purchase_date ? new Date(equipment.purchase_date).toLocaleDateString("pt-BR") : "—"}</div>
+            <div className="col-span-2"><span className="text-muted-foreground">Localização:</span> {[equipment.location_branch, equipment.location_department, equipment.location_room].filter(Boolean).join(" / ") || "—"}</div>
           </div>
           {equipment.notes && (
             <div><span className="text-muted-foreground">Obs:</span> {equipment.notes}</div>
