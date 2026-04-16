@@ -48,6 +48,9 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
   const [locationRoom, setLocationRoom] = useState("");
   const [assignedTo, setAssignedTo] = useState<string>("");
   const [notes, setNotes] = useState("");
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [purchaseDate, setPurchaseDate] = useState("");
+  const [processor, setProcessor] = useState("");
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [saving, setSaving] = useState(false);
 
