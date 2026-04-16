@@ -180,6 +180,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               <Label>Data de Compra</Label>
               <Input type="date" value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)} />
             </div>
+          </div>
           <div className="space-y-2">
             <Label>Status</Label>
             <Select value={status} onValueChange={(v) => setStatus(v as EquipmentStatus)}>
