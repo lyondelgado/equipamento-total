@@ -22,6 +22,7 @@ const statusLabels: Record<string, string> = {
   active: "Ativo",
   maintenance: "Manutenção",
   inactive: "Desativado",
+  discarded: "Descartado",
 };
 
 export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; onClose: () => void; equipment: Equipment }) {

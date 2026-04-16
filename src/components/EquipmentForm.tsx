@@ -31,6 +31,7 @@ const statusLabels: Record<EquipmentStatus, string> = {
   active: "Ativo",
   maintenance: "Manutenção",
   inactive: "Desativado",
+  discarded: "Descartado",
 };
 
 export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment }: EquipmentFormProps) {

@@ -28,12 +28,14 @@ const statusLabels: Record<string, string> = {
   active: "Ativo",
   maintenance: "Manutenção",
   inactive: "Desativado",
+  discarded: "Descartado",
 };
 
 const statusColors: Record<string, string> = {
   active: "bg-success text-success-foreground",
   maintenance: "bg-warning text-warning-foreground",
   inactive: "bg-destructive text-destructive-foreground",
+  discarded: "bg-muted text-muted-foreground",
 };
 
 interface EquipmentListProps {
