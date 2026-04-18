@@ -139,6 +139,50 @@ export type Database = {
           },
         ]
       }
+      equipment_maintenance: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          equipment_id: string
+          id: string
+          problem_description: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          sent_at: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          equipment_id: string
+          id?: string
+          problem_description: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          sent_at?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          equipment_id?: string
+          id?: string
+          problem_description?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          sent_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_maintenance_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       equipment_movements: {
         Row: {
           created_at: string
