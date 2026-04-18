@@ -283,6 +283,12 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
           </div>
         </form>
       </DialogContent>
+      <MaintenanceDialog
+        open={maintenanceOpen}
+        onClose={() => setMaintenanceOpen(false)}
+        onConfirm={handleMaintenanceConfirm}
+      />
     </Dialog>
   );
 }
+
