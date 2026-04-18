@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EmployeeForm } from "@/components/EmployeeForm";
 import { Plus, Search, Pencil, Trash2, UserCheck, UserX, Clock } from "lucide-react";
 import { toast } from "sonner";
@@ -52,6 +53,7 @@ function EmployeesPage() {
   const navigate = useNavigate();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Employee | null>(null);
@@ -92,6 +94,7 @@ function EmployeesPage() {
   };
 
   const filtered = employees.filter((e) => {
+    if (statusFilter !== "all" && e.status !== statusFilter) return false;
     const q = search.toLowerCase();
     return (
       e.full_name.toLowerCase().includes(q) ||
@@ -120,14 +123,27 @@ function EmployeesPage() {
             </Button>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2 mb-4">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nome, email, CPF, cargo ou setor..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="max-w-md"
-              />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 flex-1">
+                <Search className="h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por nome, email, CPF, cargo ou setor..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="max-w-md"
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="Filtrar por status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os status</SelectItem>
+                  <SelectItem value="active">Em atividade</SelectItem>
+                  <SelectItem value="inactive">Desligado</SelectItem>
+                  <SelectItem value="on_leave">Afastado</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             {loading ? (
               <div className="text-center py-8 text-muted-foreground">Carregando...</div>
