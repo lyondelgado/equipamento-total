@@ -30,8 +30,8 @@ export const Route = createFileRoute("/employees")({
 });
 
 const statusLabels: Record<string, string> = {
-  active: "Ativo",
-  inactive: "Inativo",
+  active: "Em atividade",
+  inactive: "Desligado",
   on_leave: "Afastado",
 };
 
