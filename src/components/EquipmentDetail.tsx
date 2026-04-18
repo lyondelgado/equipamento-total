@@ -151,7 +151,7 @@ export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; o
         <Tabs defaultValue="movements">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="movements">Movimentações</TabsTrigger>
-            <TabsTrigger value="owners">Responsáveis ({previousOwners.length})</TabsTrigger>
+            <TabsTrigger value="owners">Responsáveis ({ownersHistory.length})</TabsTrigger>
             <TabsTrigger value="maintenance">
               <Wrench className="h-3 w-3 mr-1" /> Manutenção ({maintenances.length})
             </TabsTrigger>
@@ -180,16 +180,22 @@ export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; o
           </TabsContent>
 
           <TabsContent value="owners" className="mt-4">
-            {previousOwners.length === 0 ? (
+            {ownersHistory.length === 0 ? (
               <p className="text-sm text-muted-foreground">Nenhum responsável no histórico.</p>
             ) : (
               <ul className="space-y-2">
-                {previousOwners.map((o: any) => (
-                  <li key={o.name} className="flex justify-between border rounded-lg p-3 text-sm">
-                    <span className="font-medium">{o.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(o.date).toLocaleDateString("pt-BR")}
-                    </span>
+                {ownersHistory.map((o) => (
+                  <li key={o.name} className="border rounded-lg p-3 text-sm space-y-1">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">{o.name}</span>
+                      {!o.releasedAt && <Badge variant="outline">Atual</Badge>}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Assumiu em {new Date(o.assumedAt).toLocaleString("pt-BR")}
+                      {o.releasedAt && (
+                        <> · Entregou em {new Date(o.releasedAt).toLocaleString("pt-BR")}</>
+                      )}
+                    </div>
                   </li>
                 ))}
               </ul>
