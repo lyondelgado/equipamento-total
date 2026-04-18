@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { MaintenanceDialog } from "@/components/MaintenanceDialog";
 import { toast } from "sonner";
 import type { Tables, Enums } from "@/integrations/supabase/types";
 
@@ -17,6 +18,14 @@ type EquipmentStatus = Enums<"equipment_status">;
 interface Profile {
   id: string;
   full_name: string;
+}
+
+interface Employee {
+  id: string;
+  full_name: string;
+  branch: string | null;
+  department: string | null;
+  linked_user_id: string | null;
 }
 
 interface EquipmentFormProps {
@@ -30,7 +39,7 @@ interface EquipmentFormProps {
 const statusLabels: Record<EquipmentStatus, string> = {
   active: "Ativo",
   maintenance: "Manutenção",
-  inactive: "Desativado",
+  inactive: "Inativo",
   discarded: "Descartado",
 };
 
@@ -52,13 +61,20 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
   const [purchaseDate, setPurchaseDate] = useState("");
   const [processor, setProcessor] = useState("");
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [saving, setSaving] = useState(false);
+  const [maintenanceOpen, setMaintenanceOpen] = useState(false);
+  const [pendingProblem, setPendingProblem] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
       supabase.from("profiles").select("id, full_name").then(({ data }) => {
         if (data) setProfiles(data);
       });
+      supabase.from("employees").select("id, full_name, branch, department, linked_user_id").eq("status", "active").then(({ data }) => {
+        if (data) setEmployees(data as Employee[]);
+      });
+      setPendingProblem(null);
       if (equipment) {
         setBrand(equipment.brand);
         setModel(equipment.model);
