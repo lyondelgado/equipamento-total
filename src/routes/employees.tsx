@@ -94,6 +94,7 @@ function EmployeesPage() {
   };
 
   const filtered = employees.filter((e) => {
+    if (statusFilter !== "all" && e.status !== statusFilter) return false;
     const q = search.toLowerCase();
     return (
       e.full_name.toLowerCase().includes(q) ||
