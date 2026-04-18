@@ -123,14 +123,27 @@ function EmployeesPage() {
             </Button>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2 mb-4">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nome, email, CPF, cargo ou setor..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="max-w-md"
-              />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 flex-1">
+                <Search className="h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por nome, email, CPF, cargo ou setor..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="max-w-md"
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="Filtrar por status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os status</SelectItem>
+                  <SelectItem value="active">Em atividade</SelectItem>
+                  <SelectItem value="inactive">Desligado</SelectItem>
+                  <SelectItem value="on_leave">Afastado</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             {loading ? (
               <div className="text-center py-8 text-muted-foreground">Carregando...</div>
