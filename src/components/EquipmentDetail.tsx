@@ -95,18 +95,35 @@ export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; o
     }
   };
 
-  // Lista única de responsáveis (histórico)
-  const previousOwners = Array.from(
-    new Map(
-      movements
-        .flatMap((m) => [
-          m.from_person_name ? { name: m.from_person_name, date: m.created_at } : null,
-          m.to_person_name ? { name: m.to_person_name, date: m.created_at } : null,
-        ])
-        .filter(Boolean)
-        .map((o: any) => [o.name, o])
-    ).values()
-  );
+  // Histórico de responsáveis: quando assumiu (to_person) e quando entregou (from_person)
+  // movements vem ordenado desc; ordenamos asc para reconstruir a linha do tempo
+  const ownersHistory = (() => {
+    const asc = [...movements].sort(
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+    const map = new Map<string, { name: string; assumedAt: string; releasedAt: string | null }>();
+    for (const m of asc) {
+      if (m.to_person_name) {
+        const key = m.to_person_name;
+        if (!map.has(key)) {
+          map.set(key, { name: key, assumedAt: m.created_at, releasedAt: null });
+        } else {
+          // reassumiu: atualiza assumedAt e limpa releasedAt
+          map.set(key, { name: key, assumedAt: m.created_at, releasedAt: null });
+        }
+      }
+      if (m.from_person_name) {
+        const key = m.from_person_name;
+        const existing = map.get(key);
+        if (existing) {
+          map.set(key, { ...existing, releasedAt: m.created_at });
+        }
+      }
+    }
+    return Array.from(map.values()).sort(
+      (a, b) => new Date(b.assumedAt).getTime() - new Date(a.assumedAt).getTime()
+    );
+  })();
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -134,7 +151,7 @@ export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; o
         <Tabs defaultValue="movements">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="movements">Movimentações</TabsTrigger>
-            <TabsTrigger value="owners">Responsáveis ({previousOwners.length})</TabsTrigger>
+            <TabsTrigger value="owners">Responsáveis ({ownersHistory.length})</TabsTrigger>
             <TabsTrigger value="maintenance">
               <Wrench className="h-3 w-3 mr-1" /> Manutenção ({maintenances.length})
             </TabsTrigger>
@@ -163,16 +180,22 @@ export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; o
           </TabsContent>
 
           <TabsContent value="owners" className="mt-4">
-            {previousOwners.length === 0 ? (
+            {ownersHistory.length === 0 ? (
               <p className="text-sm text-muted-foreground">Nenhum responsável no histórico.</p>
             ) : (
               <ul className="space-y-2">
-                {previousOwners.map((o: any) => (
-                  <li key={o.name} className="flex justify-between border rounded-lg p-3 text-sm">
-                    <span className="font-medium">{o.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(o.date).toLocaleDateString("pt-BR")}
-                    </span>
+                {ownersHistory.map((o) => (
+                  <li key={o.name} className="border rounded-lg p-3 text-sm space-y-1">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">{o.name}</span>
+                      {!o.releasedAt && <Badge variant="outline">Atual</Badge>}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Assumiu em {new Date(o.assumedAt).toLocaleString("pt-BR")}
+                      {o.releasedAt && (
+                        <> · Entregou em {new Date(o.releasedAt).toLocaleString("pt-BR")}</>
+                      )}
+                    </div>
                   </li>
                 ))}
               </ul>
