@@ -121,6 +121,10 @@ export function EmployeeForm({ open, onClose, onSaved, employee }: EmployeeFormP
       };
 
       if (employee) {
+        const wasActive = employee.status === "active";
+        const nowInactive = status === "inactive";
+        const justTerminated = wasActive && nowInactive;
+
         const { error } = await supabase.from("employees").update(payload).eq("id", employee.id);
         if (error) throw error;
 
@@ -132,7 +136,48 @@ export function EmployeeForm({ open, onClose, onSaved, employee }: EmployeeFormP
           );
         }
 
-        toast.success("Funcionário atualizado!");
+        // On termination: release equipment + close custody
+        if (justTerminated) {
+          const profileId = linkedUserId
+            ? (await supabase.from("profiles").select("id").eq("user_id", linkedUserId).maybeSingle()).data?.id
+            : null;
+
+          // Find equipment assigned via profile link
+          const assignedIds: string[] = [];
+          if (profileId) {
+            const { data: eqs } = await supabase
+              .from("equipment")
+              .select("id, location_branch, location_department")
+              .eq("assigned_to", profileId);
+            if (eqs) {
+              for (const eq of eqs) {
+                assignedIds.push(eq.id);
+                await supabase.from("equipment_movements").insert({
+                  equipment_id: eq.id,
+                  from_person: profileId,
+                  to_person: null,
+                  from_location: `${eq.location_branch} / ${eq.location_department}`.trim(),
+                  to_location: "Estoque",
+                  notes: `Funcionário ${fullName.trim()} desligado em ${new Date().toLocaleDateString("pt-BR")}`,
+                });
+              }
+            }
+            if (assignedIds.length > 0) {
+              await supabase
+                .from("equipment")
+                .update({ status: "inactive", assigned_to: null })
+                .in("id", assignedIds);
+            }
+          }
+
+          toast.success(
+            assignedIds.length > 0
+              ? `Funcionário desligado. ${assignedIds.length} equipamento(s) marcados como Inativo.`
+              : "Funcionário desligado."
+          );
+        } else {
+          toast.success("Funcionário atualizado!");
+        }
       } else {
         const { error } = await supabase.from("employees").insert(payload);
         if (error) throw error;
@@ -201,9 +246,8 @@ export function EmployeeForm({ open, onClose, onSaved, employee }: EmployeeFormP
               <Select value={status} onValueChange={setStatus}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Ativo</SelectItem>
-                  <SelectItem value="inactive">Inativo</SelectItem>
-                  <SelectItem value="on_leave">Afastado</SelectItem>
+                  <SelectItem value="active">Em atividade</SelectItem>
+                  <SelectItem value="inactive">Desligado</SelectItem>
                 </SelectContent>
               </Select>
             </div>
