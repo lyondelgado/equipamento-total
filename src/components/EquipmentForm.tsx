@@ -263,7 +263,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
           </div>
           <div className="space-y-2">
             <Label>Responsável</Label>
-            <Select value={assignedTo || "__none__"} onValueChange={(v) => setAssignedTo(v === "__none__" ? "" : v)}>
+            <Select value={assignedTo || "__none__"} onValueChange={handleAssignedToChange}>
               <SelectTrigger><SelectValue placeholder="Nenhum" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="__none__">Nenhum</SelectItem>
