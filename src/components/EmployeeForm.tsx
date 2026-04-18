@@ -201,9 +201,8 @@ export function EmployeeForm({ open, onClose, onSaved, employee }: EmployeeFormP
               <Select value={status} onValueChange={setStatus}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Ativo</SelectItem>
-                  <SelectItem value="inactive">Inativo</SelectItem>
-                  <SelectItem value="on_leave">Afastado</SelectItem>
+                  <SelectItem value="active">Em atividade</SelectItem>
+                  <SelectItem value="inactive">Desligado</SelectItem>
                 </SelectContent>
               </Select>
             </div>
