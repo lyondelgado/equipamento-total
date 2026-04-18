@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { MaintenanceDialog } from "@/components/MaintenanceDialog";
 import { toast } from "sonner";
 import type { Tables, Enums } from "@/integrations/supabase/types";
 
@@ -17,6 +18,14 @@ type EquipmentStatus = Enums<"equipment_status">;
 interface Profile {
   id: string;
   full_name: string;
+}
+
+interface Employee {
+  id: string;
+  full_name: string;
+  branch: string | null;
+  department: string | null;
+  linked_user_id: string | null;
 }
 
 interface EquipmentFormProps {
@@ -30,7 +39,7 @@ interface EquipmentFormProps {
 const statusLabels: Record<EquipmentStatus, string> = {
   active: "Ativo",
   maintenance: "Manutenção",
-  inactive: "Desativado",
+  inactive: "Inativo",
   discarded: "Descartado",
 };
 
@@ -52,13 +61,20 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
   const [purchaseDate, setPurchaseDate] = useState("");
   const [processor, setProcessor] = useState("");
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [saving, setSaving] = useState(false);
+  const [maintenanceOpen, setMaintenanceOpen] = useState(false);
+  const [pendingProblem, setPendingProblem] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
       supabase.from("profiles").select("id, full_name").then(({ data }) => {
         if (data) setProfiles(data);
       });
+      supabase.from("employees").select("id, full_name, branch, department, linked_user_id").eq("status", "active").then(({ data }) => {
+        if (data) setEmployees(data as Employee[]);
+      });
+      setPendingProblem(null);
       if (equipment) {
         setBrand(equipment.brand);
         setModel(equipment.model);
@@ -82,12 +98,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
     }
   }, [open, equipment]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!brand.trim() || !model.trim()) {
-      toast.error("Marca e modelo são obrigatórios");
-      return;
-    }
+  const performSave = async (problemDescription: string | null) => {
     setSaving(true);
     const payload = {
       type: equipmentType,
@@ -108,11 +119,11 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
     };
 
     let error;
+    let equipmentId: string | null = equipment?.id || null;
     if (isEdit) {
       const oldEquipment = equipment!;
       ({ error } = await supabase.from("equipment").update(payload).eq("id", oldEquipment.id));
 
-      // Record movement if assignment or location changed
       if (!error && (oldEquipment.assigned_to !== (assignedTo || null) ||
           `${oldEquipment.location_branch}/${oldEquipment.location_department}/${oldEquipment.location_room}` !==
           `${locationBranch.trim()}/${locationDepartment.trim()}/${locationRoom.trim()}`)) {
@@ -127,7 +138,18 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
         });
       }
     } else {
-      ({ error } = await supabase.from("equipment").insert(payload));
+      const { data, error: insertError } = await supabase.from("equipment").insert(payload).select("id").single();
+      error = insertError;
+      if (data) equipmentId = data.id;
+    }
+
+    if (!error && problemDescription && equipmentId) {
+      await supabase.from("equipment_maintenance").insert({
+        equipment_id: equipmentId,
+        problem_description: problemDescription,
+        status: "open",
+        created_by: user?.id || null,
+      });
     }
 
     setSaving(false);
@@ -139,6 +161,39 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
       onClose();
     }
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!brand.trim() || !model.trim()) {
+      toast.error("Marca e modelo são obrigatórios");
+      return;
+    }
+    const wasNotMaintenance = !equipment || equipment.status !== "maintenance";
+    if (status === "maintenance" && wasNotMaintenance) {
+      setMaintenanceOpen(true);
+      return;
+    }
+    await performSave(null);
+  };
+
+  const handleMaintenanceConfirm = async (problem: string) => {
+    setPendingProblem(problem);
+    setMaintenanceOpen(false);
+    await performSave(problem);
+  };
+
+  const handleAssignedToChange = (value: string) => {
+    const id = value === "__none__" ? "" : value;
+    setAssignedTo(id);
+    if (id) {
+      const emp = employees.find((e) => e.linked_user_id === id);
+      if (emp) {
+        if (emp.branch) setLocationBranch(emp.branch);
+        if (emp.department) setLocationDepartment(emp.department);
+      }
+    }
+  };
+
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -208,7 +263,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
           </div>
           <div className="space-y-2">
             <Label>Responsável</Label>
-            <Select value={assignedTo || "__none__"} onValueChange={(v) => setAssignedTo(v === "__none__" ? "" : v)}>
+            <Select value={assignedTo || "__none__"} onValueChange={handleAssignedToChange}>
               <SelectTrigger><SelectValue placeholder="Nenhum" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="__none__">Nenhum</SelectItem>
@@ -228,6 +283,12 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
           </div>
         </form>
       </DialogContent>
+      <MaintenanceDialog
+        open={maintenanceOpen}
+        onClose={() => setMaintenanceOpen(false)}
+        onConfirm={handleMaintenanceConfirm}
+      />
     </Dialog>
   );
 }
+

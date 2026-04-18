@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { EquipmentForm } from "@/components/EquipmentForm";
 import { EquipmentDetail } from "@/components/EquipmentDetail";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, Pencil, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -27,7 +28,7 @@ type EquipmentType = Enums<"equipment_type">;
 const statusLabels: Record<string, string> = {
   active: "Ativo",
   maintenance: "Manutenção",
-  inactive: "Desativado",
+  inactive: "Inativo",
   discarded: "Descartado",
 };
 
@@ -51,6 +52,7 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
   const [editing, setEditing] = useState<Equipment | null>(null);
   const [viewing, setViewing] = useState<Equipment | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const fetchEquipment = useCallback(async () => {
     setLoading(true);
@@ -82,7 +84,9 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
   };
 
   const filtered = equipment.filter((e) => {
+    if (statusFilter !== "all" && e.status !== statusFilter) return false;
     const q = search.toLowerCase();
+    if (!q) return true;
     return (
       e.brand.toLowerCase().includes(q) ||
       e.model.toLowerCase().includes(q) ||
@@ -102,7 +106,7 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
           </Button>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-4 flex-wrap">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar por marca, modelo, série, patrimônio ou responsável..."
@@ -110,6 +114,18 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
               onChange={(e) => setSearch(e.target.value)}
               className="max-w-md"
             />
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os status</SelectItem>
+                <SelectItem value="active">Ativo</SelectItem>
+                <SelectItem value="maintenance">Manutenção</SelectItem>
+                <SelectItem value="inactive">Inativo</SelectItem>
+                <SelectItem value="discarded">Descartado</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">Carregando...</div>

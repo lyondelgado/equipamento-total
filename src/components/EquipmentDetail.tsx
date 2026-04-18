@@ -1,9 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowRight, Wrench, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Equipment = Tables<"equipment">;
@@ -18,42 +22,95 @@ interface Movement {
   notes: string | null;
 }
 
+interface Maintenance {
+  id: string;
+  problem_description: string;
+  resolution_notes: string | null;
+  sent_at: string;
+  resolved_at: string | null;
+  status: string;
+}
+
 const statusLabels: Record<string, string> = {
   active: "Ativo",
   maintenance: "Manutenção",
-  inactive: "Desativado",
+  inactive: "Inativo",
   discarded: "Descartado",
 };
 
 export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; onClose: () => void; equipment: Equipment }) {
   const [movements, setMovements] = useState<Movement[]>([]);
+  const [maintenances, setMaintenances] = useState<Maintenance[]>([]);
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
+  const [resolutionNotes, setResolutionNotes] = useState("");
 
-  useEffect(() => {
-    if (open && equipment) {
+  const fetchData = useCallback(async () => {
+    if (!equipment) return;
+    const [{ data: mov }, { data: maint }] = await Promise.all([
       supabase
         .from("equipment_movements")
         .select("id, created_at, from_location, to_location, notes, from_person:profiles!equipment_movements_from_person_fkey(full_name), to_person:profiles!equipment_movements_to_person_fkey(full_name)")
         .eq("equipment_id", equipment.id)
-        .order("created_at", { ascending: false })
-        .then(({ data }) => {
-          setMovements(
-            (data || []).map((m: any) => ({
-              id: m.id,
-              created_at: m.created_at,
-              from_location: m.from_location,
-              to_location: m.to_location,
-              from_person_name: m.from_person?.full_name || null,
-              to_person_name: m.to_person?.full_name || null,
-              notes: m.notes,
-            }))
-          );
-        });
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("equipment_maintenance")
+        .select("id, problem_description, resolution_notes, sent_at, resolved_at, status")
+        .eq("equipment_id", equipment.id)
+        .order("sent_at", { ascending: false }),
+    ]);
+    setMovements(
+      (mov || []).map((m: any) => ({
+        id: m.id,
+        created_at: m.created_at,
+        from_location: m.from_location,
+        to_location: m.to_location,
+        from_person_name: m.from_person?.full_name || null,
+        to_person_name: m.to_person?.full_name || null,
+        notes: m.notes,
+      }))
+    );
+    setMaintenances(maint || []);
+  }, [equipment]);
+
+  useEffect(() => {
+    if (open && equipment) fetchData();
+  }, [open, equipment, fetchData]);
+
+  const handleResolve = async (id: string) => {
+    const { error } = await supabase
+      .from("equipment_maintenance")
+      .update({
+        status: "resolved",
+        resolved_at: new Date().toISOString(),
+        resolution_notes: resolutionNotes.trim() || null,
+      })
+      .eq("id", id);
+    if (error) {
+      toast.error("Erro ao resolver: " + error.message);
+    } else {
+      toast.success("Manutenção marcada como resolvida");
+      setResolvingId(null);
+      setResolutionNotes("");
+      fetchData();
     }
-  }, [open, equipment]);
+  };
+
+  // Lista única de responsáveis (histórico)
+  const previousOwners = Array.from(
+    new Map(
+      movements
+        .flatMap((m) => [
+          m.from_person_name ? { name: m.from_person_name, date: m.created_at } : null,
+          m.to_person_name ? { name: m.to_person_name, date: m.created_at } : null,
+        ])
+        .filter(Boolean)
+        .map((o: any) => [o.name, o])
+    ).values()
+  );
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{equipment.brand} {equipment.model}</DialogTitle>
         </DialogHeader>
@@ -73,26 +130,115 @@ export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; o
         </div>
 
         <Separator className="my-4" />
-        <h3 className="font-semibold mb-3">Histórico de Movimentações</h3>
-        {movements.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhuma movimentação registrada.</p>
-        ) : (
-          <div className="space-y-3">
-            {movements.map((m) => (
-              <div key={m.id} className="border rounded-lg p-3 text-sm">
-                <div className="text-xs text-muted-foreground mb-1">
-                  {new Date(m.created_at).toLocaleString("pt-BR")}
-                </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span>{m.from_person_name || m.from_location || "—"}</span>
-                  <ArrowRight className="h-3 w-3 text-muted-foreground" />
-                  <span>{m.to_person_name || m.to_location || "—"}</span>
-                </div>
-                {m.notes && <div className="text-xs text-muted-foreground mt-1">{m.notes}</div>}
+
+        <Tabs defaultValue="movements">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="movements">Movimentações</TabsTrigger>
+            <TabsTrigger value="owners">Responsáveis ({previousOwners.length})</TabsTrigger>
+            <TabsTrigger value="maintenance">
+              <Wrench className="h-3 w-3 mr-1" /> Manutenção ({maintenances.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="movements" className="mt-4">
+            {movements.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhuma movimentação registrada.</p>
+            ) : (
+              <div className="space-y-3">
+                {movements.map((m) => (
+                  <div key={m.id} className="border rounded-lg p-3 text-sm">
+                    <div className="text-xs text-muted-foreground mb-1">
+                      {new Date(m.created_at).toLocaleString("pt-BR")}
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span>{m.from_person_name || m.from_location || "—"}</span>
+                      <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                      <span>{m.to_person_name || m.to_location || "—"}</span>
+                    </div>
+                    {m.notes && <div className="text-xs text-muted-foreground mt-1">{m.notes}</div>}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+            )}
+          </TabsContent>
+
+          <TabsContent value="owners" className="mt-4">
+            {previousOwners.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum responsável no histórico.</p>
+            ) : (
+              <ul className="space-y-2">
+                {previousOwners.map((o: any) => (
+                  <li key={o.name} className="flex justify-between border rounded-lg p-3 text-sm">
+                    <span className="font-medium">{o.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(o.date).toLocaleDateString("pt-BR")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </TabsContent>
+
+          <TabsContent value="maintenance" className="mt-4">
+            {maintenances.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhuma manutenção registrada.</p>
+            ) : (
+              <div className="space-y-3">
+                {maintenances.map((m) => (
+                  <div key={m.id} className="border rounded-lg p-3 text-sm space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Badge variant={m.status === "resolved" ? "outline" : "default"}>
+                        {m.status === "resolved" ? "Resolvida" : "Em aberto"}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(m.sent_at).toLocaleString("pt-BR")}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Problema:</span> {m.problem_description}
+                    </div>
+                    {m.resolution_notes && (
+                      <div>
+                        <span className="text-muted-foreground">Resolução:</span> {m.resolution_notes}
+                      </div>
+                    )}
+                    {m.resolved_at && (
+                      <div className="text-xs text-muted-foreground">
+                        Resolvida em {new Date(m.resolved_at).toLocaleString("pt-BR")}
+                      </div>
+                    )}
+                    {m.status !== "resolved" && (
+                      <div className="pt-2">
+                        {resolvingId === m.id ? (
+                          <div className="space-y-2">
+                            <Textarea
+                              placeholder="Notas da resolução (opcional)"
+                              value={resolutionNotes}
+                              onChange={(e) => setResolutionNotes(e.target.value)}
+                              rows={2}
+                            />
+                            <div className="flex gap-2">
+                              <Button size="sm" onClick={() => handleResolve(m.id)}>
+                                <CheckCircle2 className="h-3 w-3 mr-1" /> Confirmar
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => { setResolvingId(null); setResolutionNotes(""); }}>
+                                Cancelar
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <Button size="sm" variant="outline" onClick={() => setResolvingId(m.id)}>
+                            <CheckCircle2 className="h-3 w-3 mr-1" /> Marcar como resolvida
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
