@@ -47,7 +47,7 @@ function MovementsPage() {
     if (!user) return;
     supabase
       .from("equipment_movements")
-      .select("id, created_at, from_location, to_location, notes, equipment:equipment(brand, model, type), from_person:profiles!equipment_movements_from_person_fkey(full_name), to_person:profiles!equipment_movements_to_person_fkey(full_name)")
+      .select("id, created_at, from_location, to_location, notes, equipment:equipment(brand, model, type), from_person:profiles!equipment_movements_from_person_fkey(full_name), to_person:profiles!equipment_movements_to_person_fkey(full_name), from_emp:employees!equipment_movements_from_employee_fkey(full_name), to_emp:employees!equipment_movements_to_employee_fkey(full_name)")
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         setMovements(
@@ -60,8 +60,8 @@ function MovementsPage() {
             equipment_brand: m.equipment?.brand || "",
             equipment_model: m.equipment?.model || "",
             equipment_type: m.equipment?.type || "",
-            from_person_name: m.from_person?.full_name || null,
-            to_person_name: m.to_person?.full_name || null,
+            from_person_name: m.from_emp?.full_name || m.from_person?.full_name || null,
+            to_person_name: m.to_emp?.full_name || m.to_person?.full_name || null,
           }))
         );
         setLoading(false);

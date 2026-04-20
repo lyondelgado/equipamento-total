@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { Tables, Enums } from "@/integrations/supabase/types";
 
-type Equipment = Tables<"equipment"> & { profiles?: { full_name: string } | null };
+type Equipment = Tables<"equipment"> & { profiles?: { full_name: string } | null; employees?: { full_name: string } | null };
 type EquipmentType = Enums<"equipment_type">;
 
 const statusLabels: Record<string, string> = {
@@ -58,7 +58,7 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
     setLoading(true);
     const { data, error } = await supabase
       .from("equipment")
-      .select("*, profiles(full_name)")
+      .select("*, profiles(full_name), employees:assigned_employee_id(full_name)")
       .eq("type", type)
       .order("created_at", { ascending: false });
     if (error) {
@@ -92,7 +92,8 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
       e.model.toLowerCase().includes(q) ||
       (e.serial_number || "").toLowerCase().includes(q) ||
       (e.asset_tag || "").toLowerCase().includes(q) ||
-      (e.profiles?.full_name || "").toLowerCase().includes(q)
+      (e.profiles?.full_name || "").toLowerCase().includes(q) ||
+      (e.employees?.full_name || "").toLowerCase().includes(q)
     );
   });
 
@@ -164,7 +165,7 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
                           {[item.location_branch, item.location_department, item.location_room].filter(Boolean).join(" / ") || "—"}
                         </div>
                       </TableCell>
-                      <TableCell>{item.profiles?.full_name || "—"}</TableCell>
+                      <TableCell>{item.employees?.full_name || item.profiles?.full_name || "—"}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
                           <Button variant="ghost" size="icon" onClick={() => setViewing(item)}>

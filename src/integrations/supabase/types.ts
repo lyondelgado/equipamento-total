@@ -71,6 +71,7 @@ export type Database = {
       equipment: {
         Row: {
           asset_tag: string | null
+          assigned_employee_id: string | null
           assigned_to: string | null
           brand: string
           created_at: string
@@ -91,6 +92,7 @@ export type Database = {
         }
         Insert: {
           asset_tag?: string | null
+          assigned_employee_id?: string | null
           assigned_to?: string | null
           brand?: string
           created_at?: string
@@ -111,6 +113,7 @@ export type Database = {
         }
         Update: {
           asset_tag?: string | null
+          assigned_employee_id?: string | null
           assigned_to?: string | null
           brand?: string
           created_at?: string
@@ -130,6 +133,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "equipment_assigned_employee_id_fkey"
+            columns: ["assigned_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "equipment_assigned_to_fkey"
             columns: ["assigned_to"]
@@ -187,33 +197,39 @@ export type Database = {
         Row: {
           created_at: string
           equipment_id: string
+          from_employee: string | null
           from_location: string | null
           from_person: string | null
           id: string
           moved_by: string | null
           notes: string | null
+          to_employee: string | null
           to_location: string | null
           to_person: string | null
         }
         Insert: {
           created_at?: string
           equipment_id: string
+          from_employee?: string | null
           from_location?: string | null
           from_person?: string | null
           id?: string
           moved_by?: string | null
           notes?: string | null
+          to_employee?: string | null
           to_location?: string | null
           to_person?: string | null
         }
         Update: {
           created_at?: string
           equipment_id?: string
+          from_employee?: string | null
           from_location?: string | null
           from_person?: string | null
           id?: string
           moved_by?: string | null
           notes?: string | null
+          to_employee?: string | null
           to_location?: string | null
           to_person?: string | null
         }
@@ -226,10 +242,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "equipment_movements_from_employee_fkey"
+            columns: ["from_employee"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "equipment_movements_from_person_fkey"
             columns: ["from_person"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_movements_to_employee_fkey"
+            columns: ["to_employee"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
           {
