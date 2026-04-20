@@ -23,6 +23,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { Tables } from "@/integrations/supabase/types";
+import { formatCpf, onlyDigits } from "@/lib/cpf";
 
 type Employee = Tables<"employees">;
 
@@ -99,7 +100,8 @@ function EmployeesPage() {
     return (
       e.full_name.toLowerCase().includes(q) ||
       e.email.toLowerCase().includes(q) ||
-      (e.cpf || "").toLowerCase().includes(q) ||
+      (e.cpf || "").includes(onlyDigits(q)) ||
+      formatCpf(e.cpf).toLowerCase().includes(q) ||
       (e.position || "").toLowerCase().includes(q) ||
       (e.department || "").toLowerCase().includes(q)
     );
@@ -172,7 +174,7 @@ function EmployeesPage() {
                         <TableRow key={emp.id}>
                           <TableCell>
                             <div className="font-medium">{emp.full_name}</div>
-                            {emp.cpf && <div className="text-xs text-muted-foreground">{emp.cpf}</div>}
+                            {emp.cpf && <div className="text-xs text-muted-foreground">{formatCpf(emp.cpf)}</div>}
                           </TableCell>
                           <TableCell className="text-sm">{emp.email}</TableCell>
                           <TableCell className="text-sm">{emp.position || "—"}</TableCell>
