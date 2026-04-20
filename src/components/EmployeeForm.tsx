@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
+import { formatCpf, onlyDigits } from "@/lib/cpf";
 
 type Employee = Tables<"employees">;
 
@@ -39,7 +40,7 @@ export function EmployeeForm({ open, onClose, onSaved, employee }: EmployeeFormP
       setFullName(employee.full_name);
       setEmail(employee.email);
       setPhone(employee.phone || "");
-      setCpf(employee.cpf || "");
+      setCpf(formatCpf(employee.cpf));
       setPosition(employee.position || "");
       setDepartment(employee.department || "");
       setBranch(employee.branch || "");
@@ -110,7 +111,7 @@ export function EmployeeForm({ open, onClose, onSaved, employee }: EmployeeFormP
         full_name: fullName.trim(),
         email: email.trim(),
         phone: phone.trim(),
-        cpf: cpf.trim(),
+        cpf: onlyDigits(cpf),
         position: position.trim(),
         department: department.trim(),
         branch: branch.trim(),
@@ -216,7 +217,13 @@ export function EmployeeForm({ open, onClose, onSaved, employee }: EmployeeFormP
             </div>
             <div className="space-y-2">
               <Label>CPF</Label>
-              <Input value={cpf} onChange={(e) => setCpf(e.target.value)} placeholder="000.000.000-00" />
+              <Input
+                value={cpf}
+                onChange={(e) => setCpf(formatCpf(e.target.value))}
+                placeholder="000.000.000-00"
+                inputMode="numeric"
+                maxLength={14}
+              />
             </div>
             <div className="space-y-2">
               <Label>Cargo</Label>
