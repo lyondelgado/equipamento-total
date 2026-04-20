@@ -49,7 +49,7 @@ export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; o
     const [{ data: mov }, { data: maint }] = await Promise.all([
       supabase
         .from("equipment_movements")
-        .select("id, created_at, from_location, to_location, notes, from_person:profiles!equipment_movements_from_person_fkey(full_name), to_person:profiles!equipment_movements_to_person_fkey(full_name)")
+        .select("id, created_at, from_location, to_location, notes, from_person:profiles!equipment_movements_from_person_fkey(full_name), to_person:profiles!equipment_movements_to_person_fkey(full_name), from_emp:employees!equipment_movements_from_employee_fkey(full_name), to_emp:employees!equipment_movements_to_employee_fkey(full_name)")
         .eq("equipment_id", equipment.id)
         .order("created_at", { ascending: false }),
       supabase
@@ -64,8 +64,8 @@ export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; o
         created_at: m.created_at,
         from_location: m.from_location,
         to_location: m.to_location,
-        from_person_name: m.from_person?.full_name || null,
-        to_person_name: m.to_person?.full_name || null,
+        from_person_name: m.from_emp?.full_name || m.from_person?.full_name || null,
+        to_person_name: m.to_emp?.full_name || m.to_person?.full_name || null,
         notes: m.notes,
       }))
     );
