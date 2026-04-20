@@ -84,7 +84,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
         setLocationBranch(equipment.location_branch);
         setLocationDepartment(equipment.location_department);
         setLocationRoom(equipment.location_room);
-        setAssignedTo(equipment.assigned_to || "");
+        setAssignedTo((equipment as any).assigned_employee_id || equipment.assigned_to || "");
         setNotes(equipment.notes || "");
         setInvoiceNumber(equipment.invoice_number || "");
         setPurchaseDate(equipment.purchase_date || "");
@@ -100,7 +100,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
 
   const performSave = async (problemDescription: string | null) => {
     setSaving(true);
-    const payload = {
+    const payload: any = {
       type: equipmentType,
       brand: brand.trim(),
       model: model.trim(),
@@ -110,7 +110,8 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
       location_branch: locationBranch.trim(),
       location_department: locationDepartment.trim(),
       location_room: locationRoom.trim(),
-      assigned_to: assignedTo || null,
+      assigned_employee_id: assignedTo || null,
+      assigned_to: null,
       notes: notes.trim() || null,
       invoice_number: invoiceNumber.trim() || null,
       purchase_date: purchaseDate || null,
@@ -121,21 +122,23 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
     let error;
     let equipmentId: string | null = equipment?.id || null;
     if (isEdit) {
-      const oldEquipment = equipment!;
+      const oldEquipment = equipment as any;
       ({ error } = await supabase.from("equipment").update(payload).eq("id", oldEquipment.id));
 
-      if (!error && (oldEquipment.assigned_to !== (assignedTo || null) ||
+      const oldEmpId = oldEquipment.assigned_employee_id || null;
+      const newEmpId = assignedTo || null;
+      if (!error && (oldEmpId !== newEmpId ||
           `${oldEquipment.location_branch}/${oldEquipment.location_department}/${oldEquipment.location_room}` !==
           `${locationBranch.trim()}/${locationDepartment.trim()}/${locationRoom.trim()}`)) {
         await supabase.from("equipment_movements").insert({
           equipment_id: oldEquipment.id,
-          from_person: oldEquipment.assigned_to || null,
-          to_person: assignedTo || null,
+          from_employee: oldEmpId,
+          to_employee: newEmpId,
           from_location: [oldEquipment.location_branch, oldEquipment.location_department, oldEquipment.location_room].filter(Boolean).join(" / ") || null,
           to_location: [locationBranch.trim(), locationDepartment.trim(), locationRoom.trim()].filter(Boolean).join(" / ") || null,
           moved_by: user?.id || null,
           notes: "Atualização de cadastro",
-        });
+        } as any);
       }
     } else {
       const { data, error: insertError } = await supabase.from("equipment").insert(payload).select("id").single();
@@ -186,7 +189,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
     const id = value === "__none__" ? "" : value;
     setAssignedTo(id);
     if (id) {
-      const emp = employees.find((e) => e.linked_user_id === id);
+      const emp = employees.find((e) => e.id === id);
       if (emp) {
         if (emp.branch) setLocationBranch(emp.branch);
         if (emp.department) setLocationDepartment(emp.department);
@@ -267,8 +270,8 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               <SelectTrigger><SelectValue placeholder="Nenhum" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="__none__">Nenhum</SelectItem>
-                {profiles.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>{p.full_name || "Sem nome"}</SelectItem>
+                {employees.map((e) => (
+                  <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
