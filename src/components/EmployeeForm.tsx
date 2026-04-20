@@ -138,36 +138,29 @@ export function EmployeeForm({ open, onClose, onSaved, employee }: EmployeeFormP
 
         // On termination: release equipment + close custody
         if (justTerminated) {
-          const profileId = linkedUserId
-            ? (await supabase.from("profiles").select("id").eq("user_id", linkedUserId).maybeSingle()).data?.id
-            : null;
-
-          // Find equipment assigned via profile link
           const assignedIds: string[] = [];
-          if (profileId) {
-            const { data: eqs } = await supabase
+          const { data: eqs } = await supabase
+            .from("equipment")
+            .select("id, location_branch, location_department")
+            .eq("assigned_employee_id", employee.id);
+          if (eqs) {
+            for (const eq of eqs) {
+              assignedIds.push(eq.id);
+              await supabase.from("equipment_movements").insert({
+                equipment_id: eq.id,
+                from_employee: employee.id,
+                to_employee: null,
+                from_location: `${eq.location_branch} / ${eq.location_department}`.trim(),
+                to_location: "Estoque",
+                notes: `Funcionário ${fullName.trim()} desligado em ${new Date().toLocaleDateString("pt-BR")}`,
+              } as any);
+            }
+          }
+          if (assignedIds.length > 0) {
+            await supabase
               .from("equipment")
-              .select("id, location_branch, location_department")
-              .eq("assigned_to", profileId);
-            if (eqs) {
-              for (const eq of eqs) {
-                assignedIds.push(eq.id);
-                await supabase.from("equipment_movements").insert({
-                  equipment_id: eq.id,
-                  from_person: profileId,
-                  to_person: null,
-                  from_location: `${eq.location_branch} / ${eq.location_department}`.trim(),
-                  to_location: "Estoque",
-                  notes: `Funcionário ${fullName.trim()} desligado em ${new Date().toLocaleDateString("pt-BR")}`,
-                });
-              }
-            }
-            if (assignedIds.length > 0) {
-              await supabase
-                .from("equipment")
-                .update({ status: "inactive", assigned_to: null })
-                .in("id", assignedIds);
-            }
+              .update({ status: "inactive", assigned_employee_id: null, assigned_to: null } as any)
+              .in("id", assignedIds);
           }
 
           toast.success(
