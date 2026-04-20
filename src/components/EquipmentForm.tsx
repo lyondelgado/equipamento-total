@@ -71,7 +71,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
       supabase.from("profiles").select("id, full_name").then(({ data }) => {
         if (data) setProfiles(data);
       });
-      supabase.from("employees").select("id, full_name, branch, department, linked_user_id").eq("status", "active").then(({ data }) => {
+      supabase.from("employees").select("id, full_name, branch, department, linked_user_id").eq("status", "active").order("full_name").then(({ data }) => {
         if (data) setEmployees(data as Employee[]);
       });
       setPendingProblem(null);
