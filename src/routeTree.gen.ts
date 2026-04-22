@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SimCardsRouteImport } from './routes/sim-cards'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -24,6 +25,11 @@ import { Route as EquipmentNotebooksRouteImport } from './routes/equipment/noteb
 import { Route as EquipmentMonitorsRouteImport } from './routes/equipment/monitors'
 import { Route as EquipmentCamerasRouteImport } from './routes/equipment/cameras'
 
+const SimCardsRoute = SimCardsRouteImport.update({
+  id: '/sim-cards',
+  path: '/sim-cards',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/sim-cards': typeof SimCardsRoute
   '/equipment/cameras': typeof EquipmentCamerasRoute
   '/equipment/monitors': typeof EquipmentMonitorsRoute
   '/equipment/notebooks': typeof EquipmentNotebooksRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/sim-cards': typeof SimCardsRoute
   '/equipment/cameras': typeof EquipmentCamerasRoute
   '/equipment/monitors': typeof EquipmentMonitorsRoute
   '/equipment/notebooks': typeof EquipmentNotebooksRoute
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/sim-cards': typeof SimCardsRoute
   '/equipment/cameras': typeof EquipmentCamerasRoute
   '/equipment/monitors': typeof EquipmentMonitorsRoute
   '/equipment/notebooks': typeof EquipmentNotebooksRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reset-password'
     | '/signup'
+    | '/sim-cards'
     | '/equipment/cameras'
     | '/equipment/monitors'
     | '/equipment/notebooks'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reset-password'
     | '/signup'
+    | '/sim-cards'
     | '/equipment/cameras'
     | '/equipment/monitors'
     | '/equipment/notebooks'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reset-password'
     | '/signup'
+    | '/sim-cards'
     | '/equipment/cameras'
     | '/equipment/monitors'
     | '/equipment/notebooks'
@@ -205,6 +217,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  SimCardsRoute: typeof SimCardsRoute
   EquipmentCamerasRoute: typeof EquipmentCamerasRoute
   EquipmentMonitorsRoute: typeof EquipmentMonitorsRoute
   EquipmentNotebooksRoute: typeof EquipmentNotebooksRoute
@@ -214,6 +227,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sim-cards': {
+      id: '/sim-cards'
+      path: '/sim-cards'
+      fullPath: '/sim-cards'
+      preLoaderRoute: typeof SimCardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -325,6 +345,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  SimCardsRoute: SimCardsRoute,
   EquipmentCamerasRoute: EquipmentCamerasRoute,
   EquipmentMonitorsRoute: EquipmentMonitorsRoute,
   EquipmentNotebooksRoute: EquipmentNotebooksRoute,
