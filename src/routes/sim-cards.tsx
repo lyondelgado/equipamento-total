@@ -80,11 +80,11 @@ function SimCardsPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
-  const [chips, setChips] = useState<SimCard[]>([]);
+  const [chips, setChips] = useState<SimCardRow[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<SimCard | null>(null);
+  const [editing, setEditing] = useState<SimCardRow | null>(null);
   const [saving, setSaving] = useState(false);
 
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -116,7 +116,7 @@ function SimCardsPage() {
       toast.error("Erro ao carregar chips");
       return;
     }
-    setChips((data as SimCard[]) || []);
+    setChips((data as SimCardRow[]) || []);
   }
 
   async function fetchEmployees() {
@@ -144,7 +144,7 @@ function SimCardsPage() {
     setOpen(true);
   }
 
-  function openEdit(chip: SimCard) {
+  function openEdit(chip: SimCardRow) {
     setEditing(chip);
     setPhoneNumber(formatPhone(chip.phone_number));
     setSerialNumber(chip.serial_number);
@@ -349,7 +349,7 @@ function SimCardsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <SimCard className="h-5 w-5" />
+              <Smartphone className="h-5 w-5" />
               Chips cadastrados ({filtered.length})
             </CardTitle>
             <div className="relative mt-2">
