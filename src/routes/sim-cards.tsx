@@ -43,14 +43,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Search, SimCard } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Smartphone } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Route = createFileRoute("/sim-cards")({
   component: SimCardsPage,
 });
 
-type SimCard = {
+type SimCardRow = {
   id: string;
   chip_id: number;
   phone_number: string;
