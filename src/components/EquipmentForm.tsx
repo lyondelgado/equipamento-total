@@ -68,11 +68,15 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [purchaseDate, setPurchaseDate] = useState("");
   const [processor, setProcessor] = useState("");
+  const [simCardId, setSimCardId] = useState<string>("");
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [simCards, setSimCards] = useState<SimCard[]>([]);
   const [saving, setSaving] = useState(false);
   const [maintenanceOpen, setMaintenanceOpen] = useState(false);
   const [pendingProblem, setPendingProblem] = useState<string | null>(null);
+
+  const isRouter = equipmentType === "router";
 
   useEffect(() => {
     if (open) {
