@@ -86,6 +86,7 @@ export type Database = {
           processor: string | null
           purchase_date: string | null
           serial_number: string | null
+          sim_card_id: string | null
           status: Database["public"]["Enums"]["equipment_status"]
           type: Database["public"]["Enums"]["equipment_type"]
           updated_at: string
@@ -107,6 +108,7 @@ export type Database = {
           processor?: string | null
           purchase_date?: string | null
           serial_number?: string | null
+          sim_card_id?: string | null
           status?: Database["public"]["Enums"]["equipment_status"]
           type: Database["public"]["Enums"]["equipment_type"]
           updated_at?: string
@@ -128,6 +130,7 @@ export type Database = {
           processor?: string | null
           purchase_date?: string | null
           serial_number?: string | null
+          sim_card_id?: string | null
           status?: Database["public"]["Enums"]["equipment_status"]
           type?: Database["public"]["Enums"]["equipment_type"]
           updated_at?: string
@@ -145,6 +148,13 @@ export type Database = {
             columns: ["assigned_to"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_sim_card_id_fkey"
+            columns: ["sim_card_id"]
+            isOneToOne: false
+            referencedRelation: "sim_cards"
             referencedColumns: ["id"]
           },
         ]
