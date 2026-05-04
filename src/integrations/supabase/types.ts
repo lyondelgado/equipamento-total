@@ -309,7 +309,6 @@ export type Database = {
       }
       sim_cards: {
         Row: {
-          assigned_employee_id: string | null
           carrier: string
           chip_id: number
           created_at: string
@@ -318,12 +317,11 @@ export type Database = {
           notes: string | null
           phone_number: string
           plan_limit: string
-          renewal_date: string | null
+          renewal_day: number | null
           serial_number: string
           updated_at: string
         }
         Insert: {
-          assigned_employee_id?: string | null
           carrier?: string
           chip_id?: never
           created_at?: string
@@ -332,12 +330,11 @@ export type Database = {
           notes?: string | null
           phone_number?: string
           plan_limit?: string
-          renewal_date?: string | null
+          renewal_day?: number | null
           serial_number?: string
           updated_at?: string
         }
         Update: {
-          assigned_employee_id?: string | null
           carrier?: string
           chip_id?: never
           created_at?: string
@@ -346,19 +343,11 @@ export type Database = {
           notes?: string | null
           phone_number?: string
           plan_limit?: string
-          renewal_date?: string | null
+          renewal_day?: number | null
           serial_number?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "sim_cards_assigned_employee_id_fkey"
-            columns: ["assigned_employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_roles: {
         Row: {

@@ -57,12 +57,9 @@ type SimCardRow = {
   serial_number: string;
   carrier: string;
   plan_limit: string;
-  renewal_date: string | null;
-  assigned_employee_id: string | null;
+  renewal_day: number | null;
   notes: string | null;
 };
-
-type Employee = { id: string; full_name: string };
 
 const CARRIERS = ["Vivo", "Claro", "TIM", "Oi", "Algar", "Sercomtel", "Nextel", "Outra"];
 
@@ -81,7 +78,6 @@ function SimCardsPage() {
   const navigate = useNavigate();
 
   const [chips, setChips] = useState<SimCardRow[]>([]);
-  const [employees, setEmployees] = useState<Employee[]>([]);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<SimCardRow | null>(null);
@@ -91,8 +87,7 @@ function SimCardsPage() {
   const [serialNumber, setSerialNumber] = useState("");
   const [carrier, setCarrier] = useState("");
   const [planLimit, setPlanLimit] = useState("");
-  const [renewalDate, setRenewalDate] = useState("");
-  const [assignedEmployeeId, setAssignedEmployeeId] = useState<string>("none");
+  const [renewalDay, setRenewalDay] = useState<string>("");
   const [notes, setNotes] = useState("");
 
   useEffect(() => {
@@ -100,10 +95,7 @@ function SimCardsPage() {
   }, [user, loading, navigate]);
 
   useEffect(() => {
-    if (user) {
-      void fetchChips();
-      void fetchEmployees();
-    }
+    if (user) void fetchChips();
   }, [user]);
 
   async function fetchChips() {
@@ -119,23 +111,13 @@ function SimCardsPage() {
     setChips((data as SimCardRow[]) || []);
   }
 
-  async function fetchEmployees() {
-    const { data } = await supabase
-      .from("employees")
-      .select("id, full_name")
-      .eq("status", "active")
-      .order("full_name");
-    setEmployees((data as Employee[]) || []);
-  }
-
   function resetForm() {
     setEditing(null);
     setPhoneNumber("");
     setSerialNumber("");
     setCarrier("");
     setPlanLimit("");
-    setRenewalDate("");
-    setAssignedEmployeeId("none");
+    setRenewalDay("");
     setNotes("");
   }
 
@@ -150,8 +132,7 @@ function SimCardsPage() {
     setSerialNumber(chip.serial_number);
     setCarrier(chip.carrier);
     setPlanLimit(chip.plan_limit);
-    setRenewalDate(chip.renewal_date || "");
-    setAssignedEmployeeId(chip.assigned_employee_id || "none");
+    setRenewalDay(chip.renewal_day ? String(chip.renewal_day) : "");
     setNotes(chip.notes || "");
     setOpen(true);
   }
@@ -162,17 +143,22 @@ function SimCardsPage() {
       toast.error("Informe o número da linha");
       return;
     }
+    let renewal: number | null = null;
+    if (renewalDay.trim()) {
+      const n = parseInt(renewalDay, 10);
+      if (isNaN(n) || n < 1 || n > 31) {
+        toast.error("Dia de renovação deve ser entre 1 e 31");
+        return;
+      }
+      renewal = n;
+    }
     setSaving(true);
     const payload = {
       phone_number: phoneNumber.replace(/\D/g, ""),
       serial_number: serialNumber.trim(),
       carrier: carrier.trim(),
       plan_limit: planLimit.trim(),
-      renewal_date: renewalDate || null,
-      assigned_employee_id:
-        assignedEmployeeId && assignedEmployeeId !== "none"
-          ? assignedEmployeeId
-          : null,
+      renewal_day: renewal,
       notes: notes.trim(),
       created_by: user?.id ?? null,
     };
@@ -205,9 +191,6 @@ function SimCardsPage() {
     void fetchChips();
   }
 
-  const employeeName = (id: string | null) =>
-    employees.find((e) => e.id === id)?.full_name || "—";
-
   const filtered = chips.filter((c) => {
     if (!search.trim()) return true;
     const q = search.toLowerCase();
@@ -216,8 +199,7 @@ function SimCardsPage() {
       formatPhone(c.phone_number).toLowerCase().includes(q) ||
       c.phone_number.toLowerCase().includes(q) ||
       c.serial_number.toLowerCase().includes(q) ||
-      c.carrier.toLowerCase().includes(q) ||
-      employeeName(c.assigned_employee_id).toLowerCase().includes(q)
+      c.carrier.toLowerCase().includes(q)
     );
   });
 
@@ -294,35 +276,17 @@ function SimCardsPage() {
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="renewal">Data de renovação</Label>
-                    <Input
-                      id="renewal"
-                      type="date"
-                      value={renewalDate}
-                      onChange={(e) => setRenewalDate(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="employee">Responsável</Label>
-                    <Select
-                      value={assignedEmployeeId}
-                      onValueChange={setAssignedEmployeeId}
-                    >
-                      <SelectTrigger id="employee">
-                        <SelectValue placeholder="Sem responsável" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Sem responsável</SelectItem>
-                        {employees.map((emp) => (
-                          <SelectItem key={emp.id} value={emp.id}>
-                            {emp.full_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="renewal">Dia de renovação do plano</Label>
+                  <Input
+                    id="renewal"
+                    type="number"
+                    min={1}
+                    max={31}
+                    value={renewalDay}
+                    onChange={(e) => setRenewalDay(e.target.value)}
+                    placeholder="Ex: 15 (todo dia 15 do mês)"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="notes">Observações</Label>
@@ -355,7 +319,7 @@ function SimCardsPage() {
             <div className="relative mt-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar por ID, linha, série, operadora ou responsável..."
+                placeholder="Buscar por ID, linha, série ou operadora..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
@@ -373,14 +337,13 @@ function SimCardsPage() {
                     <TableHead>Operadora</TableHead>
                     <TableHead>Plano</TableHead>
                     <TableHead>Renovação</TableHead>
-                    <TableHead>Responsável</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                         Nenhum chip cadastrado
                       </TableCell>
                     </TableRow>
@@ -395,11 +358,8 @@ function SimCardsPage() {
                         <TableCell>{c.carrier || "—"}</TableCell>
                         <TableCell>{c.plan_limit || "—"}</TableCell>
                         <TableCell>
-                          {c.renewal_date
-                            ? new Date(c.renewal_date + "T00:00:00").toLocaleDateString("pt-BR")
-                            : "—"}
+                          {c.renewal_day ? `Dia ${c.renewal_day}` : "—"}
                         </TableCell>
-                        <TableCell>{employeeName(c.assigned_employee_id)}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">
                             <Button
