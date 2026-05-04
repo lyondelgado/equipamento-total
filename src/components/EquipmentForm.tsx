@@ -110,12 +110,14 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
         setPurchaseDate(equipment.purchase_date || "");
         setProcessor(equipment.processor || "");
         setSimCardId((equipment as any).sim_card_id || "");
+        setCameraType((equipment as any).camera_type || "");
       } else {
         setBrand(""); setModel(""); setSerialNumber(""); setAssetTag("");
         setStatus("active"); setLocationBranch(""); setLocationDepartment("");
         setLocationRoom(""); setAssignedTo(""); setNotes("");
         setInvoiceNumber(""); setPurchaseDate(""); setProcessor("");
         setSimCardId("");
+        setCameraType("");
       }
     }
   }, [open, equipment, isRouter]);
