@@ -240,15 +240,35 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               <Label>Nº de Série</Label>
               <Input value={serialNumber} onChange={(e) => setSerialNumber(e.target.value)} />
             </div>
+            {!isRouter && (
+              <div className="space-y-2">
+                <Label>Patrimônio</Label>
+                <Input value={assetTag} onChange={(e) => setAssetTag(e.target.value)} />
+              </div>
+            )}
+          </div>
+          {!isRouter && (
             <div className="space-y-2">
-              <Label>Patrimônio</Label>
-              <Input value={assetTag} onChange={(e) => setAssetTag(e.target.value)} />
+              <Label>Processador</Label>
+              <Input value={processor} onChange={(e) => setProcessor(e.target.value)} placeholder="Ex: Intel Core i5-1135G7" />
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Processador</Label>
-            <Input value={processor} onChange={(e) => setProcessor(e.target.value)} placeholder="Ex: Intel Core i5-1135G7" />
-          </div>
+          )}
+          {isRouter && (
+            <div className="space-y-2">
+              <Label>Chip</Label>
+              <Select value={simCardId || "__none__"} onValueChange={(v) => setSimCardId(v === "__none__" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Nenhum" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Nenhum</SelectItem>
+                  {simCards.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.serial_number} — {s.carrier} ({s.phone_number})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Nota Fiscal</Label>
@@ -270,19 +290,23 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className={isRouter ? "space-y-2" : "grid grid-cols-3 gap-4"}>
             <div className="space-y-2">
               <Label>Filial</Label>
               <Input value={locationBranch} onChange={(e) => setLocationBranch(e.target.value)} />
             </div>
-            <div className="space-y-2">
-              <Label>Setor</Label>
-              <Input value={locationDepartment} onChange={(e) => setLocationDepartment(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Sala</Label>
-              <Input value={locationRoom} onChange={(e) => setLocationRoom(e.target.value)} />
-            </div>
+            {!isRouter && (
+              <>
+                <div className="space-y-2">
+                  <Label>Setor</Label>
+                  <Input value={locationDepartment} onChange={(e) => setLocationDepartment(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Sala</Label>
+                  <Input value={locationRoom} onChange={(e) => setLocationRoom(e.target.value)} />
+                </div>
+              </>
+            )}
           </div>
           <div className="space-y-2">
             <Label>Responsável</Label>
