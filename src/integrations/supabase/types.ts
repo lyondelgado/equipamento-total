@@ -74,6 +74,7 @@ export type Database = {
           assigned_employee_id: string | null
           assigned_to: string | null
           brand: string
+          camera_type: string | null
           created_at: string
           created_by: string | null
           id: string
@@ -96,6 +97,7 @@ export type Database = {
           assigned_employee_id?: string | null
           assigned_to?: string | null
           brand?: string
+          camera_type?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -118,6 +120,7 @@ export type Database = {
           assigned_employee_id?: string | null
           assigned_to?: string | null
           brand?: string
+          camera_type?: string | null
           created_at?: string
           created_by?: string | null
           id?: string

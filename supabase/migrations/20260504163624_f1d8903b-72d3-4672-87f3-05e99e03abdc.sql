@@ -1,0 +1,1 @@
+ALTER TABLE public.equipment ADD COLUMN IF NOT EXISTS camera_type text;
