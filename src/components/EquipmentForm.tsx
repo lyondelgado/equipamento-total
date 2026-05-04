@@ -86,6 +86,11 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
       supabase.from("employees").select("id, full_name, branch, department, linked_user_id").eq("status", "active").order("full_name").then(({ data }) => {
         if (data) setEmployees(data as Employee[]);
       });
+      if (isRouter) {
+        supabase.from("sim_cards").select("id, chip_id, serial_number, phone_number, carrier").order("chip_id").then(({ data }) => {
+          if (data) setSimCards(data as SimCard[]);
+        });
+      }
       setPendingProblem(null);
       if (equipment) {
         setBrand(equipment.brand);
@@ -101,11 +106,13 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
         setInvoiceNumber(equipment.invoice_number || "");
         setPurchaseDate(equipment.purchase_date || "");
         setProcessor(equipment.processor || "");
+        setSimCardId((equipment as any).sim_card_id || "");
       } else {
         setBrand(""); setModel(""); setSerialNumber(""); setAssetTag("");
         setStatus("active"); setLocationBranch(""); setLocationDepartment("");
         setLocationRoom(""); setAssignedTo(""); setNotes("");
         setInvoiceNumber(""); setPurchaseDate(""); setProcessor("");
+        setSimCardId("");
       }
     }
   }, [open, equipment]);
