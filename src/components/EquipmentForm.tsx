@@ -28,6 +28,14 @@ interface Employee {
   linked_user_id: string | null;
 }
 
+interface SimCard {
+  id: string;
+  chip_id: number;
+  serial_number: string;
+  phone_number: string;
+  carrier: string;
+}
+
 interface EquipmentFormProps {
   open: boolean;
   onClose: () => void;
