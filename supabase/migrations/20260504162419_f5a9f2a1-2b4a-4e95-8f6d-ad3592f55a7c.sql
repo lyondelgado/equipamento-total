@@ -1,0 +1,2 @@
+ALTER TABLE public.equipment ADD COLUMN IF NOT EXISTS sim_card_id uuid REFERENCES public.sim_cards(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_equipment_sim_card_id ON public.equipment(sim_card_id);

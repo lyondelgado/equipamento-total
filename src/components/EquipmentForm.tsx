@@ -28,6 +28,14 @@ interface Employee {
   linked_user_id: string | null;
 }
 
+interface SimCard {
+  id: string;
+  chip_id: number;
+  serial_number: string;
+  phone_number: string;
+  carrier: string;
+}
+
 interface EquipmentFormProps {
   open: boolean;
   onClose: () => void;
@@ -60,11 +68,15 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [purchaseDate, setPurchaseDate] = useState("");
   const [processor, setProcessor] = useState("");
+  const [simCardId, setSimCardId] = useState<string>("");
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [simCards, setSimCards] = useState<SimCard[]>([]);
   const [saving, setSaving] = useState(false);
   const [maintenanceOpen, setMaintenanceOpen] = useState(false);
   const [pendingProblem, setPendingProblem] = useState<string | null>(null);
+
+  const isRouter = equipmentType === "router";
 
   useEffect(() => {
     if (open) {
@@ -74,6 +86,11 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
       supabase.from("employees").select("id, full_name, branch, department, linked_user_id").eq("status", "active").order("full_name").then(({ data }) => {
         if (data) setEmployees(data as Employee[]);
       });
+      if (isRouter) {
+        supabase.from("sim_cards").select("id, chip_id, serial_number, phone_number, carrier").order("chip_id").then(({ data }) => {
+          if (data) setSimCards(data as SimCard[]);
+        });
+      }
       setPendingProblem(null);
       if (equipment) {
         setBrand(equipment.brand);
@@ -89,14 +106,16 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
         setInvoiceNumber(equipment.invoice_number || "");
         setPurchaseDate(equipment.purchase_date || "");
         setProcessor(equipment.processor || "");
+        setSimCardId((equipment as any).sim_card_id || "");
       } else {
         setBrand(""); setModel(""); setSerialNumber(""); setAssetTag("");
         setStatus("active"); setLocationBranch(""); setLocationDepartment("");
         setLocationRoom(""); setAssignedTo(""); setNotes("");
         setInvoiceNumber(""); setPurchaseDate(""); setProcessor("");
+        setSimCardId("");
       }
     }
-  }, [open, equipment]);
+  }, [open, equipment, isRouter]);
 
   const performSave = async (problemDescription: string | null) => {
     setSaving(true);
@@ -105,17 +124,18 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
       brand: brand.trim(),
       model: model.trim(),
       serial_number: serialNumber.trim() || null,
-      asset_tag: assetTag.trim() || null,
+      asset_tag: isRouter ? null : (assetTag.trim() || null),
       status,
       location_branch: locationBranch.trim(),
-      location_department: locationDepartment.trim(),
-      location_room: locationRoom.trim(),
+      location_department: isRouter ? "" : locationDepartment.trim(),
+      location_room: isRouter ? "" : locationRoom.trim(),
       assigned_employee_id: assignedTo || null,
       assigned_to: null,
       notes: notes.trim() || null,
       invoice_number: invoiceNumber.trim() || null,
       purchase_date: purchaseDate || null,
-      processor: processor.trim() || null,
+      processor: isRouter ? null : (processor.trim() || null),
+      sim_card_id: isRouter ? (simCardId || null) : null,
       created_by: user?.id || null,
     };
 
@@ -220,15 +240,35 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               <Label>Nº de Série</Label>
               <Input value={serialNumber} onChange={(e) => setSerialNumber(e.target.value)} />
             </div>
+            {!isRouter && (
+              <div className="space-y-2">
+                <Label>Patrimônio</Label>
+                <Input value={assetTag} onChange={(e) => setAssetTag(e.target.value)} />
+              </div>
+            )}
+          </div>
+          {!isRouter && (
             <div className="space-y-2">
-              <Label>Patrimônio</Label>
-              <Input value={assetTag} onChange={(e) => setAssetTag(e.target.value)} />
+              <Label>Processador</Label>
+              <Input value={processor} onChange={(e) => setProcessor(e.target.value)} placeholder="Ex: Intel Core i5-1135G7" />
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Processador</Label>
-            <Input value={processor} onChange={(e) => setProcessor(e.target.value)} placeholder="Ex: Intel Core i5-1135G7" />
-          </div>
+          )}
+          {isRouter && (
+            <div className="space-y-2">
+              <Label>Chip</Label>
+              <Select value={simCardId || "__none__"} onValueChange={(v) => setSimCardId(v === "__none__" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Nenhum" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Nenhum</SelectItem>
+                  {simCards.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.serial_number} — {s.carrier} ({s.phone_number})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Nota Fiscal</Label>
@@ -250,19 +290,23 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className={isRouter ? "space-y-2" : "grid grid-cols-3 gap-4"}>
             <div className="space-y-2">
               <Label>Filial</Label>
               <Input value={locationBranch} onChange={(e) => setLocationBranch(e.target.value)} />
             </div>
-            <div className="space-y-2">
-              <Label>Setor</Label>
-              <Input value={locationDepartment} onChange={(e) => setLocationDepartment(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Sala</Label>
-              <Input value={locationRoom} onChange={(e) => setLocationRoom(e.target.value)} />
-            </div>
+            {!isRouter && (
+              <>
+                <div className="space-y-2">
+                  <Label>Setor</Label>
+                  <Input value={locationDepartment} onChange={(e) => setLocationDepartment(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Sala</Label>
+                  <Input value={locationRoom} onChange={(e) => setLocationRoom(e.target.value)} />
+                </div>
+              </>
+            )}
           </div>
           <div className="space-y-2">
             <Label>Responsável</Label>
