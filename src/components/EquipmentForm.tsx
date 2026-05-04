@@ -69,6 +69,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
   const [purchaseDate, setPurchaseDate] = useState("");
   const [processor, setProcessor] = useState("");
   const [simCardId, setSimCardId] = useState<string>("");
+  const [cameraType, setCameraType] = useState<string>("");
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [simCards, setSimCards] = useState<SimCard[]>([]);
@@ -77,6 +78,8 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
   const [pendingProblem, setPendingProblem] = useState<string | null>(null);
 
   const isRouter = equipmentType === "router";
+  const isCamera = equipmentType === "camera";
+  const hideExtras = isRouter || isCamera;
 
   useEffect(() => {
     if (open) {
@@ -107,12 +110,14 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
         setPurchaseDate(equipment.purchase_date || "");
         setProcessor(equipment.processor || "");
         setSimCardId((equipment as any).sim_card_id || "");
+        setCameraType((equipment as any).camera_type || "");
       } else {
         setBrand(""); setModel(""); setSerialNumber(""); setAssetTag("");
         setStatus("active"); setLocationBranch(""); setLocationDepartment("");
         setLocationRoom(""); setAssignedTo(""); setNotes("");
         setInvoiceNumber(""); setPurchaseDate(""); setProcessor("");
         setSimCardId("");
+        setCameraType("");
       }
     }
   }, [open, equipment, isRouter]);
@@ -124,18 +129,19 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
       brand: brand.trim(),
       model: model.trim(),
       serial_number: serialNumber.trim() || null,
-      asset_tag: isRouter ? null : (assetTag.trim() || null),
+      asset_tag: hideExtras ? null : (assetTag.trim() || null),
       status,
       location_branch: locationBranch.trim(),
-      location_department: isRouter ? "" : locationDepartment.trim(),
-      location_room: isRouter ? "" : locationRoom.trim(),
+      location_department: hideExtras ? "" : locationDepartment.trim(),
+      location_room: hideExtras ? "" : locationRoom.trim(),
       assigned_employee_id: assignedTo || null,
       assigned_to: null,
       notes: notes.trim() || null,
-      invoice_number: invoiceNumber.trim() || null,
-      purchase_date: purchaseDate || null,
-      processor: isRouter ? null : (processor.trim() || null),
+      invoice_number: hideExtras ? null : (invoiceNumber.trim() || null),
+      purchase_date: hideExtras ? null : (purchaseDate || null),
+      processor: hideExtras ? null : (processor.trim() || null),
       sim_card_id: isRouter ? (simCardId || null) : null,
+      camera_type: isCamera ? (cameraType || null) : null,
       created_by: user?.id || null,
     };
 
@@ -240,17 +246,32 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               <Label>Nº de Série</Label>
               <Input value={serialNumber} onChange={(e) => setSerialNumber(e.target.value)} />
             </div>
-            {!isRouter && (
+            {!hideExtras && (
               <div className="space-y-2">
                 <Label>Patrimônio</Label>
                 <Input value={assetTag} onChange={(e) => setAssetTag(e.target.value)} />
               </div>
             )}
           </div>
-          {!isRouter && (
+          {!hideExtras && (
             <div className="space-y-2">
               <Label>Processador</Label>
               <Input value={processor} onChange={(e) => setProcessor(e.target.value)} placeholder="Ex: Intel Core i5-1135G7" />
+            </div>
+          )}
+          {isCamera && (
+            <div className="space-y-2">
+              <Label>Tipo</Label>
+              <Select value={cameraType || "__none__"} onValueChange={(v) => setCameraType(v === "__none__" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Selecione o tipo</SelectItem>
+                  <SelectItem value="ConstructIN">ConstructIN</SelectItem>
+                  <SelectItem value="Camera Wifi">Camera Wifi</SelectItem>
+                  <SelectItem value="DVR">DVR</SelectItem>
+                  <SelectItem value="Camera de Seguranca">Câmera de Segurança</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           )}
           {isRouter && (
@@ -269,16 +290,18 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               </Select>
             </div>
           )}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Nota Fiscal</Label>
-              <Input value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} />
+          {!hideExtras && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Nota Fiscal</Label>
+                <Input value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Data de Compra</Label>
+                <Input type="date" value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)} />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Data de Compra</Label>
-              <Input type="date" value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)} />
-            </div>
-          </div>
+          )}
           <div className="space-y-2">
             <Label>Status</Label>
             <Select value={status} onValueChange={(v) => setStatus(v as EquipmentStatus)}>
@@ -290,12 +313,12 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               </SelectContent>
             </Select>
           </div>
-          <div className={isRouter ? "space-y-2" : "grid grid-cols-3 gap-4"}>
+          <div className={hideExtras ? "space-y-2" : "grid grid-cols-3 gap-4"}>
             <div className="space-y-2">
               <Label>Filial</Label>
               <Input value={locationBranch} onChange={(e) => setLocationBranch(e.target.value)} />
             </div>
-            {!isRouter && (
+            {!hideExtras && (
               <>
                 <div className="space-y-2">
                   <Label>Setor</Label>
