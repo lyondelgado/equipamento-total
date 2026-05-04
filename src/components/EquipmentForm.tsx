@@ -115,7 +115,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
         setSimCardId("");
       }
     }
-  }, [open, equipment]);
+  }, [open, equipment, isRouter]);
 
   const performSave = async (problemDescription: string | null) => {
     setSaving(true);
