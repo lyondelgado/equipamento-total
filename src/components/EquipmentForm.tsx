@@ -313,12 +313,12 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               </SelectContent>
             </Select>
           </div>
-          <div className={isRouter ? "space-y-2" : "grid grid-cols-3 gap-4"}>
+          <div className={hideExtras ? "space-y-2" : "grid grid-cols-3 gap-4"}>
             <div className="space-y-2">
               <Label>Filial</Label>
               <Input value={locationBranch} onChange={(e) => setLocationBranch(e.target.value)} />
             </div>
-            {!isRouter && (
+            {!hideExtras && (
               <>
                 <div className="space-y-2">
                   <Label>Setor</Label>
