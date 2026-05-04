@@ -246,17 +246,32 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               <Label>Nº de Série</Label>
               <Input value={serialNumber} onChange={(e) => setSerialNumber(e.target.value)} />
             </div>
-            {!isRouter && (
+            {!hideExtras && (
               <div className="space-y-2">
                 <Label>Patrimônio</Label>
                 <Input value={assetTag} onChange={(e) => setAssetTag(e.target.value)} />
               </div>
             )}
           </div>
-          {!isRouter && (
+          {!hideExtras && (
             <div className="space-y-2">
               <Label>Processador</Label>
               <Input value={processor} onChange={(e) => setProcessor(e.target.value)} placeholder="Ex: Intel Core i5-1135G7" />
+            </div>
+          )}
+          {isCamera && (
+            <div className="space-y-2">
+              <Label>Tipo</Label>
+              <Select value={cameraType || "__none__"} onValueChange={(v) => setCameraType(v === "__none__" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Selecione o tipo</SelectItem>
+                  <SelectItem value="ConstructIN">ConstructIN</SelectItem>
+                  <SelectItem value="Camera Wifi">Camera Wifi</SelectItem>
+                  <SelectItem value="DVR">DVR</SelectItem>
+                  <SelectItem value="Camera de Seguranca">Câmera de Segurança</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           )}
           {isRouter && (
@@ -275,16 +290,18 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               </Select>
             </div>
           )}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Nota Fiscal</Label>
-              <Input value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} />
+          {!hideExtras && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Nota Fiscal</Label>
+                <Input value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Data de Compra</Label>
+                <Input type="date" value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)} />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Data de Compra</Label>
-              <Input type="date" value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)} />
-            </div>
-          </div>
+          )}
           <div className="space-y-2">
             <Label>Status</Label>
             <Select value={status} onValueChange={(v) => setStatus(v as EquipmentStatus)}>
