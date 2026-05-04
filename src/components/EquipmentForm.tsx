@@ -78,6 +78,8 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
   const [pendingProblem, setPendingProblem] = useState<string | null>(null);
 
   const isRouter = equipmentType === "router";
+  const isCamera = equipmentType === "camera";
+  const hideExtras = isRouter || isCamera;
 
   useEffect(() => {
     if (open) {
