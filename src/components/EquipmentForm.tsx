@@ -264,7 +264,13 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
                 <Label>Patrimônio</Label>
                 <Input value={assetTag} onChange={(e) => setAssetTag(e.target.value)} />
               </div>
-            )}
+          )}
+          {showServiceTag && (
+            <div className="space-y-2">
+              <Label>Service Tag</Label>
+              <Input value={serviceTag} onChange={(e) => setServiceTag(e.target.value)} />
+            </div>
+          )}
           </div>
           {!hideProcessor && (
             <div className="space-y-2">
