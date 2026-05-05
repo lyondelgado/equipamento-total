@@ -79,7 +79,13 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
 
   const isRouter = equipmentType === "router";
   const isCamera = equipmentType === "camera";
+  const isPrinter = equipmentType === "printer";
   const hideExtras = isRouter || isCamera;
+  const hideAssetTag = hideExtras || isPrinter;
+  const hideProcessor = hideExtras || isPrinter;
+  const hideDepartment = hideExtras || isPrinter;
+  const hideRoom = hideExtras;
+  const hideInvoice = hideExtras;
 
   useEffect(() => {
     if (open) {
@@ -129,17 +135,17 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
       brand: brand.trim(),
       model: model.trim(),
       serial_number: serialNumber.trim() || null,
-      asset_tag: hideExtras ? null : (assetTag.trim() || null),
+      asset_tag: hideAssetTag ? null : (assetTag.trim() || null),
       status,
       location_branch: locationBranch.trim(),
-      location_department: hideExtras ? "" : locationDepartment.trim(),
-      location_room: hideExtras ? "" : locationRoom.trim(),
+      location_department: hideDepartment ? "" : locationDepartment.trim(),
+      location_room: hideRoom ? "" : locationRoom.trim(),
       assigned_employee_id: assignedTo || null,
       assigned_to: null,
       notes: notes.trim() || null,
-      invoice_number: hideExtras ? null : (invoiceNumber.trim() || null),
-      purchase_date: hideExtras ? null : (purchaseDate || null),
-      processor: hideExtras ? null : (processor.trim() || null),
+      invoice_number: hideInvoice ? null : (invoiceNumber.trim() || null),
+      purchase_date: hideInvoice ? null : (purchaseDate || null),
+      processor: hideProcessor ? null : (processor.trim() || null),
       sim_card_id: isRouter ? (simCardId || null) : null,
       camera_type: isCamera ? (cameraType || null) : null,
       created_by: user?.id || null,
@@ -246,14 +252,14 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               <Label>Nº de Série</Label>
               <Input value={serialNumber} onChange={(e) => setSerialNumber(e.target.value)} />
             </div>
-            {!hideExtras && (
+            {!hideAssetTag && (
               <div className="space-y-2">
                 <Label>Patrimônio</Label>
                 <Input value={assetTag} onChange={(e) => setAssetTag(e.target.value)} />
               </div>
             )}
           </div>
-          {!hideExtras && (
+          {!hideProcessor && (
             <div className="space-y-2">
               <Label>Processador</Label>
               <Input value={processor} onChange={(e) => setProcessor(e.target.value)} placeholder="Ex: Intel Core i5-1135G7" />
@@ -313,22 +319,22 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               </SelectContent>
             </Select>
           </div>
-          <div className={hideExtras ? "space-y-2" : "grid grid-cols-3 gap-4"}>
+          <div className={hideExtras ? "space-y-2" : isPrinter ? "grid grid-cols-2 gap-4" : "grid grid-cols-3 gap-4"}>
             <div className="space-y-2">
               <Label>Filial</Label>
               <Input value={locationBranch} onChange={(e) => setLocationBranch(e.target.value)} />
             </div>
-            {!hideExtras && (
-              <>
-                <div className="space-y-2">
-                  <Label>Setor</Label>
-                  <Input value={locationDepartment} onChange={(e) => setLocationDepartment(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Sala</Label>
-                  <Input value={locationRoom} onChange={(e) => setLocationRoom(e.target.value)} />
-                </div>
-              </>
+            {!hideDepartment && (
+              <div className="space-y-2">
+                <Label>Setor</Label>
+                <Input value={locationDepartment} onChange={(e) => setLocationDepartment(e.target.value)} />
+              </div>
+            )}
+            {!hideRoom && (
+              <div className="space-y-2">
+                <Label>Sala</Label>
+                <Input value={locationRoom} onChange={(e) => setLocationRoom(e.target.value)} />
+              </div>
             )}
           </div>
           <div className="space-y-2">
