@@ -320,7 +320,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               </SelectContent>
             </Select>
           </div>
-          <div className={hideExtras ? "space-y-2" : isPrinter ? "grid grid-cols-2 gap-4" : "grid grid-cols-3 gap-4"}>
+          <div className={hideExtras || isMonitor ? "space-y-2" : isPrinter ? "grid grid-cols-2 gap-4" : "grid grid-cols-3 gap-4"}>
             <div className="space-y-2">
               <Label>Filial</Label>
               <Input value={locationBranch} onChange={(e) => setLocationBranch(e.target.value)} />
