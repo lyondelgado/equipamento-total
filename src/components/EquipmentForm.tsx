@@ -324,17 +324,17 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               <Label>Filial</Label>
               <Input value={locationBranch} onChange={(e) => setLocationBranch(e.target.value)} />
             </div>
-            {!hideExtras && (
-              <>
-                <div className="space-y-2">
-                  <Label>Setor</Label>
-                  <Input value={locationDepartment} onChange={(e) => setLocationDepartment(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Sala</Label>
-                  <Input value={locationRoom} onChange={(e) => setLocationRoom(e.target.value)} />
-                </div>
-              </>
+            {!hideDepartment && (
+              <div className="space-y-2">
+                <Label>Setor</Label>
+                <Input value={locationDepartment} onChange={(e) => setLocationDepartment(e.target.value)} />
+              </div>
+            )}
+            {!hideRoom && (
+              <div className="space-y-2">
+                <Label>Sala</Label>
+                <Input value={locationRoom} onChange={(e) => setLocationRoom(e.target.value)} />
+              </div>
             )}
           </div>
           <div className="space-y-2">
