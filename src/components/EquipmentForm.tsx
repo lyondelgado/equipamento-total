@@ -154,6 +154,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
       processor: hideProcessor ? null : (processor.trim() || null),
       sim_card_id: isRouter ? (simCardId || null) : null,
       camera_type: isCamera ? (cameraType || null) : null,
+      service_tag: showServiceTag ? (serviceTag.trim() || null) : null,
       created_by: user?.id || null,
     };
 
