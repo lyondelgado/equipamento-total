@@ -267,9 +267,9 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
                 <SelectContent>
                   <SelectItem value="__none__">Selecione o tipo</SelectItem>
                   <SelectItem value="ConstructIN">ConstructIN</SelectItem>
-                  <SelectItem value="Camera Wifi">Camera Wifi</SelectItem>
+                  <SelectItem value="Câmera Wi-Fi">Câmera Wi-Fi</SelectItem>
                   <SelectItem value="DVR">DVR</SelectItem>
-                  <SelectItem value="Camera de Seguranca">Câmera de Segurança</SelectItem>
+                  <SelectItem value="Câmera de Segurança">Câmera de Segurança</SelectItem>
                 </SelectContent>
               </Select>
             </div>
