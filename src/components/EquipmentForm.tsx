@@ -70,6 +70,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
   const [processor, setProcessor] = useState("");
   const [simCardId, setSimCardId] = useState<string>("");
   const [cameraType, setCameraType] = useState<string>("");
+  const [serviceTag, setServiceTag] = useState("");
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [simCards, setSimCards] = useState<SimCard[]>([]);
@@ -81,6 +82,8 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
   const isCamera = equipmentType === "camera";
   const isPrinter = equipmentType === "printer";
   const isMonitor = equipmentType === "monitor";
+  const isNotebook = equipmentType === "notebook";
+  const showServiceTag = isNotebook || isMonitor;
   const hideExtras = isRouter || isCamera;
   const hideAssetTag = hideExtras || isPrinter || isMonitor;
   const hideProcessor = hideExtras || isPrinter || isMonitor;
@@ -118,6 +121,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
         setProcessor(equipment.processor || "");
         setSimCardId((equipment as any).sim_card_id || "");
         setCameraType((equipment as any).camera_type || "");
+        setServiceTag((equipment as any).service_tag || "");
       } else {
         setBrand(""); setModel(""); setSerialNumber(""); setAssetTag("");
         setStatus("active"); setLocationBranch(""); setLocationDepartment("");
@@ -125,6 +129,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
         setInvoiceNumber(""); setPurchaseDate(""); setProcessor("");
         setSimCardId("");
         setCameraType("");
+        setServiceTag("");
       }
     }
   }, [open, equipment, isRouter]);
@@ -149,6 +154,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
       processor: hideProcessor ? null : (processor.trim() || null),
       sim_card_id: isRouter ? (simCardId || null) : null,
       camera_type: isCamera ? (cameraType || null) : null,
+      service_tag: showServiceTag ? (serviceTag.trim() || null) : null,
       created_by: user?.id || null,
     };
 
@@ -260,6 +266,12 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               </div>
             )}
           </div>
+          {showServiceTag && (
+            <div className="space-y-2">
+              <Label>Service Tag</Label>
+              <Input value={serviceTag} onChange={(e) => setServiceTag(e.target.value)} />
+            </div>
+          )}
           {!hideProcessor && (
             <div className="space-y-2">
               <Label>Processador</Label>

@@ -87,6 +87,7 @@ export type Database = {
           processor: string | null
           purchase_date: string | null
           serial_number: string | null
+          service_tag: string | null
           sim_card_id: string | null
           status: Database["public"]["Enums"]["equipment_status"]
           type: Database["public"]["Enums"]["equipment_type"]
@@ -110,6 +111,7 @@ export type Database = {
           processor?: string | null
           purchase_date?: string | null
           serial_number?: string | null
+          service_tag?: string | null
           sim_card_id?: string | null
           status?: Database["public"]["Enums"]["equipment_status"]
           type: Database["public"]["Enums"]["equipment_type"]
@@ -133,6 +135,7 @@ export type Database = {
           processor?: string | null
           purchase_date?: string | null
           serial_number?: string | null
+          service_tag?: string | null
           sim_card_id?: string | null
           status?: Database["public"]["Enums"]["equipment_status"]
           type?: Database["public"]["Enums"]["equipment_type"]
