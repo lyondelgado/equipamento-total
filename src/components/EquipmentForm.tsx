@@ -79,7 +79,13 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
 
   const isRouter = equipmentType === "router";
   const isCamera = equipmentType === "camera";
+  const isPrinter = equipmentType === "printer";
   const hideExtras = isRouter || isCamera;
+  const hideAssetTag = hideExtras || isPrinter;
+  const hideProcessor = hideExtras || isPrinter;
+  const hideDepartment = hideExtras || isPrinter;
+  const hideRoom = hideExtras;
+  const hideInvoice = hideExtras;
 
   useEffect(() => {
     if (open) {
