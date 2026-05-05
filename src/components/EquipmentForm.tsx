@@ -82,6 +82,8 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
   const isCamera = equipmentType === "camera";
   const isPrinter = equipmentType === "printer";
   const isMonitor = equipmentType === "monitor";
+  const isNotebook = equipmentType === "notebook";
+  const showServiceTag = isNotebook || isMonitor;
   const hideExtras = isRouter || isCamera;
   const hideAssetTag = hideExtras || isPrinter || isMonitor;
   const hideProcessor = hideExtras || isPrinter || isMonitor;
