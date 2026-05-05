@@ -252,14 +252,14 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               <Label>Nº de Série</Label>
               <Input value={serialNumber} onChange={(e) => setSerialNumber(e.target.value)} />
             </div>
-            {!hideExtras && (
+            {!hideAssetTag && (
               <div className="space-y-2">
                 <Label>Patrimônio</Label>
                 <Input value={assetTag} onChange={(e) => setAssetTag(e.target.value)} />
               </div>
             )}
           </div>
-          {!hideExtras && (
+          {!hideProcessor && (
             <div className="space-y-2">
               <Label>Processador</Label>
               <Input value={processor} onChange={(e) => setProcessor(e.target.value)} placeholder="Ex: Intel Core i5-1135G7" />
