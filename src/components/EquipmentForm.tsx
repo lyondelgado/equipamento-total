@@ -70,6 +70,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
   const [processor, setProcessor] = useState("");
   const [simCardId, setSimCardId] = useState<string>("");
   const [cameraType, setCameraType] = useState<string>("");
+  const [serviceTag, setServiceTag] = useState("");
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [simCards, setSimCards] = useState<SimCard[]>([]);
