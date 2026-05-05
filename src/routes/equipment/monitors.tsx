@@ -13,5 +13,5 @@ function MonitorsPage() {
   const navigate = useNavigate();
   useEffect(() => { if (!loading && !user) navigate({ to: "/login" }); }, [user, loading, navigate]);
   if (loading || !user) return null;
-  return <DashboardLayout><EquipmentList type="monitor" title="Monitores" /></DashboardLayout>;
+  return <DashboardLayout><EquipmentList type="monitor" title="Monitores e TV's" /></DashboardLayout>;
 }

@@ -34,7 +34,7 @@ const navItems = [
 
 const equipmentItems = [
   { title: "Notebooks", url: "/equipment/notebooks", icon: Laptop },
-  { title: "Monitores", url: "/equipment/monitors", icon: Monitor },
+  { title: "Monitores e TV's", url: "/equipment/monitors", icon: Monitor },
   { title: "Roteadores", url: "/equipment/routers", icon: Wifi },
   { title: "Câmeras", url: "/equipment/cameras", icon: Camera },
   { title: "Impressoras", url: "/equipment/printers", icon: Printer },

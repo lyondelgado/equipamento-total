@@ -11,7 +11,7 @@ type EquipmentType = Enums<"equipment_type">;
 
 const typeConfig: { type: EquipmentType; label: string; icon: typeof Laptop; color: string }[] = [
   { type: "notebook", label: "Notebooks", icon: Laptop, color: "text-chart-1" },
-  { type: "monitor", label: "Monitores", icon: Monitor, color: "text-chart-2" },
+  { type: "monitor", label: "Monitores e TV's", icon: Monitor, color: "text-chart-2" },
   { type: "router", label: "Roteadores", icon: Wifi, color: "text-chart-3" },
   { type: "camera", label: "Câmeras", icon: Camera, color: "text-chart-4" },
   { type: "printer", label: "Impressoras", icon: Printer, color: "text-chart-5" },
