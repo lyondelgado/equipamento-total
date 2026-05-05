@@ -121,6 +121,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
         setProcessor(equipment.processor || "");
         setSimCardId((equipment as any).sim_card_id || "");
         setCameraType((equipment as any).camera_type || "");
+        setServiceTag((equipment as any).service_tag || "");
       } else {
         setBrand(""); setModel(""); setSerialNumber(""); setAssetTag("");
         setStatus("active"); setLocationBranch(""); setLocationDepartment("");
@@ -128,6 +129,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
         setInvoiceNumber(""); setPurchaseDate(""); setProcessor("");
         setSimCardId("");
         setCameraType("");
+        setServiceTag("");
       }
     }
   }, [open, equipment, isRouter]);
