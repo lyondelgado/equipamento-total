@@ -80,10 +80,11 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
   const isRouter = equipmentType === "router";
   const isCamera = equipmentType === "camera";
   const isPrinter = equipmentType === "printer";
+  const isMonitor = equipmentType === "monitor";
   const hideExtras = isRouter || isCamera;
-  const hideAssetTag = hideExtras || isPrinter;
-  const hideProcessor = hideExtras || isPrinter;
-  const hideDepartment = hideExtras || isPrinter;
+  const hideAssetTag = hideExtras || isPrinter || isMonitor;
+  const hideProcessor = hideExtras || isPrinter || isMonitor;
+  const hideDepartment = hideExtras || isPrinter || isMonitor;
   const hideRoom = hideExtras;
   const hideInvoice = hideExtras;
 
