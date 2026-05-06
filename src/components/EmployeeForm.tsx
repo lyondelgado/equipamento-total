@@ -122,9 +122,8 @@ export function EmployeeForm({ open, onClose, onSaved, employee }: EmployeeFormP
       };
 
       if (employee) {
-        const wasActive = employee.status === "active";
         const nowInactive = status === "inactive";
-        const justTerminated = wasActive && nowInactive;
+        const justTerminated = nowInactive;
 
         const { error } = await supabase.from("employees").update(payload).eq("id", employee.id);
         if (error) throw error;
