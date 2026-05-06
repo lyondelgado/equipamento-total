@@ -96,11 +96,13 @@ function EmployeesPage() {
 
   const filtered = employees.filter((e) => {
     if (statusFilter !== "all" && e.status !== statusFilter) return false;
-    const q = search.toLowerCase();
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    const qDigits = onlyDigits(q);
     return (
       e.full_name.toLowerCase().includes(q) ||
       e.email.toLowerCase().includes(q) ||
-      (e.cpf || "").includes(onlyDigits(q)) ||
+      (qDigits && (e.cpf || "").includes(qDigits)) ||
       formatCpf(e.cpf).toLowerCase().includes(q) ||
       (e.position || "").toLowerCase().includes(q) ||
       (e.department || "").toLowerCase().includes(q)
