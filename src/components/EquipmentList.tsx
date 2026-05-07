@@ -164,7 +164,7 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Marca / Modelo</TableHead>
-                    <TableHead>Patrimônio</TableHead>
+                    {!isMonitor && <TableHead>Patrimônio</TableHead>}
                     <TableHead>Status</TableHead>
                     <TableHead>Localização</TableHead>
                     <TableHead>Responsável</TableHead>
@@ -178,7 +178,7 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
                         <div className="font-medium">{item.brand}</div>
                         <div className="text-sm text-muted-foreground">{item.model}</div>
                       </TableCell>
-                      <TableCell>{item.asset_tag || "—"}</TableCell>
+                      {!isMonitor && <TableCell>{item.asset_tag || "—"}</TableCell>}
                       <TableCell>
                         <Badge className={statusColors[item.status] || ""}>
                           {statusLabels[item.status]}
