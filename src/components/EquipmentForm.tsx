@@ -315,9 +315,20 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
                   ))}
                 </SelectContent>
               </Select>
+          )}
+          {isRouter && (
+            <div className="space-y-2">
+              <Label>Tecnologia</Label>
+              <Select value={technology || "__none__"} onValueChange={(v) => setTechnology(v === "__none__" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Nenhuma</SelectItem>
+                  <SelectItem value="4G">4G</SelectItem>
+                  <SelectItem value="5G">5G</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           )}
-          {!hideExtras && (
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Nota Fiscal</Label>
