@@ -83,19 +83,37 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
     setDeleteId(null);
   };
 
+  const isMonitor = type === "monitor";
+
   const filtered = equipment.filter((e) => {
     if (statusFilter !== "all" && e.status !== statusFilter) return false;
     const q = search.toLowerCase();
     if (!q) return true;
+    const responsible = (e.employees?.full_name || e.profiles?.full_name || "").toLowerCase();
+    if (isMonitor) {
+      return (
+        (e.serial_number || "").toLowerCase().includes(q) ||
+        (e.service_tag || "").toLowerCase().includes(q) ||
+        e.model.toLowerCase().includes(q) ||
+        responsible.includes(q)
+      );
+    }
     return (
       e.brand.toLowerCase().includes(q) ||
       e.model.toLowerCase().includes(q) ||
       (e.serial_number || "").toLowerCase().includes(q) ||
+      (e.service_tag || "").toLowerCase().includes(q) ||
       (e.asset_tag || "").toLowerCase().includes(q) ||
-      (e.profiles?.full_name || "").toLowerCase().includes(q) ||
-      (e.employees?.full_name || "").toLowerCase().includes(q)
+      responsible.includes(q)
     );
   });
+
+  const counts = {
+    active: equipment.filter((e) => e.status === "active").length,
+    inactive: equipment.filter((e) => e.status === "inactive").length,
+    discarded: equipment.filter((e) => e.status === "discarded").length,
+    total: equipment.length,
+  };
 
   return (
     <>
