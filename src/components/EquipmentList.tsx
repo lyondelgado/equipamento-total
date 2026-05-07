@@ -83,19 +83,37 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
     setDeleteId(null);
   };
 
+  const isMonitor = type === "monitor";
+
   const filtered = equipment.filter((e) => {
     if (statusFilter !== "all" && e.status !== statusFilter) return false;
     const q = search.toLowerCase();
     if (!q) return true;
+    const responsible = (e.employees?.full_name || e.profiles?.full_name || "").toLowerCase();
+    if (isMonitor) {
+      return (
+        (e.serial_number || "").toLowerCase().includes(q) ||
+        (e.service_tag || "").toLowerCase().includes(q) ||
+        e.model.toLowerCase().includes(q) ||
+        responsible.includes(q)
+      );
+    }
     return (
       e.brand.toLowerCase().includes(q) ||
       e.model.toLowerCase().includes(q) ||
       (e.serial_number || "").toLowerCase().includes(q) ||
+      (e.service_tag || "").toLowerCase().includes(q) ||
       (e.asset_tag || "").toLowerCase().includes(q) ||
-      (e.profiles?.full_name || "").toLowerCase().includes(q) ||
-      (e.employees?.full_name || "").toLowerCase().includes(q)
+      responsible.includes(q)
     );
   });
+
+  const counts = {
+    active: equipment.filter((e) => e.status === "active").length,
+    inactive: equipment.filter((e) => e.status === "inactive").length,
+    discarded: equipment.filter((e) => e.status === "discarded").length,
+    total: equipment.length,
+  };
 
   return (
     <>
@@ -107,10 +125,16 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
           </Button>
         </CardHeader>
         <CardContent>
+          <div className="flex flex-wrap items-center gap-3 mb-3 text-sm">
+            <span className="px-2 py-1 rounded-md bg-success/10 text-success font-medium">Ativos: {counts.active}</span>
+            <span className="px-2 py-1 rounded-md bg-destructive/10 text-destructive font-medium">Inativos: {counts.inactive}</span>
+            <span className="px-2 py-1 rounded-md bg-muted text-muted-foreground font-medium">Descartados: {counts.discarded}</span>
+            <span className="px-2 py-1 rounded-md bg-primary/10 text-primary font-medium">Total: {counts.total}</span>
+          </div>
           <div className="flex items-center gap-2 mb-4 flex-wrap">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar por marca, modelo, série, patrimônio ou responsável..."
+              placeholder={isMonitor ? "Buscar por série, service tag, modelo ou responsável..." : "Buscar por marca, modelo, série, patrimônio ou responsável..."}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="max-w-md"
@@ -140,7 +164,7 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Marca / Modelo</TableHead>
-                    <TableHead>Patrimônio</TableHead>
+                    {!isMonitor && <TableHead>Patrimônio</TableHead>}
                     <TableHead>Status</TableHead>
                     <TableHead>Localização</TableHead>
                     <TableHead>Responsável</TableHead>
@@ -154,7 +178,7 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
                         <div className="font-medium">{item.brand}</div>
                         <div className="text-sm text-muted-foreground">{item.model}</div>
                       </TableCell>
-                      <TableCell>{item.asset_tag || "—"}</TableCell>
+                      {!isMonitor && <TableCell>{item.asset_tag || "—"}</TableCell>}
                       <TableCell>
                         <Badge className={statusColors[item.status] || ""}>
                           {statusLabels[item.status]}
