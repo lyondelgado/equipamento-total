@@ -258,7 +258,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               <Input value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="Ex: Dell" />
             </div>
             <div className="space-y-2">
-              <Label>Modelo *</Label>
+              <Label>Modelo {!isRouter && "*"}</Label>
               <Input value={model} onChange={(e) => setModel(e.target.value)} placeholder="Ex: Latitude 5520" />
             </div>
           </div>
