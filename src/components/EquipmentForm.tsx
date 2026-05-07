@@ -71,6 +71,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
   const [simCardId, setSimCardId] = useState<string>("");
   const [cameraType, setCameraType] = useState<string>("");
   const [serviceTag, setServiceTag] = useState("");
+  const [technology, setTechnology] = useState<string>("");
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [simCards, setSimCards] = useState<SimCard[]>([]);
@@ -122,6 +123,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
         setSimCardId((equipment as any).sim_card_id || "");
         setCameraType((equipment as any).camera_type || "");
         setServiceTag((equipment as any).service_tag || "");
+        setTechnology((equipment as any).technology || "");
       } else {
         setBrand(""); setModel(""); setSerialNumber(""); setAssetTag("");
         setStatus("active"); setLocationBranch(""); setLocationDepartment("");
@@ -130,6 +132,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
         setSimCardId("");
         setCameraType("");
         setServiceTag("");
+        setTechnology("");
       }
     }
   }, [open, equipment, isRouter]);
@@ -155,6 +158,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
       sim_card_id: isRouter ? (simCardId || null) : null,
       camera_type: isCamera ? (cameraType || null) : null,
       service_tag: showServiceTag ? (serviceTag.trim() || null) : null,
+      technology: isRouter ? (technology || null) : null,
       created_by: user?.id || null,
     };
 
@@ -206,8 +210,12 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!brand.trim() || !model.trim()) {
-      toast.error("Marca e modelo são obrigatórios");
+    if (!brand.trim()) {
+      toast.error("Marca é obrigatória");
+      return;
+    }
+    if (!isRouter && !model.trim()) {
+      toast.error("Modelo é obrigatório");
       return;
     }
     const wasNotMaintenance = !equipment || equipment.status !== "maintenance";
@@ -250,7 +258,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               <Input value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="Ex: Dell" />
             </div>
             <div className="space-y-2">
-              <Label>Modelo *</Label>
+              <Label>Modelo {!isRouter && "*"}</Label>
               <Input value={model} onChange={(e) => setModel(e.target.value)} placeholder="Ex: Latitude 5520" />
             </div>
           </div>
@@ -305,6 +313,19 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
                       {s.serial_number} — {s.carrier} ({s.phone_number})
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          {isRouter && (
+            <div className="space-y-2">
+              <Label>Tecnologia</Label>
+              <Select value={technology || "__none__"} onValueChange={(v) => setTechnology(v === "__none__" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Nenhuma</SelectItem>
+                  <SelectItem value="4G">4G</SelectItem>
+                  <SelectItem value="5G">5G</SelectItem>
                 </SelectContent>
               </Select>
             </div>

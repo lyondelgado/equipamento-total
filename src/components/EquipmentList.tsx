@@ -84,6 +84,8 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
   };
 
   const isMonitor = type === "monitor";
+  const isRouter = type === "router";
+  const hideAssetTag = isMonitor || isRouter;
 
   const filtered = equipment.filter((e) => {
     if (statusFilter !== "all" && e.status !== statusFilter) return false;
