@@ -125,10 +125,16 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
           </Button>
         </CardHeader>
         <CardContent>
+          <div className="flex flex-wrap items-center gap-3 mb-3 text-sm">
+            <span className="px-2 py-1 rounded-md bg-success/10 text-success font-medium">Ativos: {counts.active}</span>
+            <span className="px-2 py-1 rounded-md bg-destructive/10 text-destructive font-medium">Inativos: {counts.inactive}</span>
+            <span className="px-2 py-1 rounded-md bg-muted text-muted-foreground font-medium">Descartados: {counts.discarded}</span>
+            <span className="px-2 py-1 rounded-md bg-primary/10 text-primary font-medium">Total: {counts.total}</span>
+          </div>
           <div className="flex items-center gap-2 mb-4 flex-wrap">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar por marca, modelo, série, patrimônio ou responsável..."
+              placeholder={isMonitor ? "Buscar por série, service tag, modelo ou responsável..." : "Buscar por marca, modelo, série, patrimônio ou responsável..."}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="max-w-md"
