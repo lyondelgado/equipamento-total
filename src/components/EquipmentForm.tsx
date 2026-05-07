@@ -315,6 +315,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
                   ))}
                 </SelectContent>
               </Select>
+            </div>
           )}
           {isRouter && (
             <div className="space-y-2">
@@ -329,6 +330,7 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
               </Select>
             </div>
           )}
+          {!hideExtras && (
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Nota Fiscal</Label>
