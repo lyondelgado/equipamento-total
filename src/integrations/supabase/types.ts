@@ -90,6 +90,7 @@ export type Database = {
           service_tag: string | null
           sim_card_id: string | null
           status: Database["public"]["Enums"]["equipment_status"]
+          technology: string | null
           type: Database["public"]["Enums"]["equipment_type"]
           updated_at: string
         }
@@ -114,6 +115,7 @@ export type Database = {
           service_tag?: string | null
           sim_card_id?: string | null
           status?: Database["public"]["Enums"]["equipment_status"]
+          technology?: string | null
           type: Database["public"]["Enums"]["equipment_type"]
           updated_at?: string
         }
@@ -138,6 +140,7 @@ export type Database = {
           service_tag?: string | null
           sim_card_id?: string | null
           status?: Database["public"]["Enums"]["equipment_status"]
+          technology?: string | null
           type?: Database["public"]["Enums"]["equipment_type"]
           updated_at?: string
         }
