@@ -67,9 +67,32 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
       .order("created_at", { ascending: false });
     if (error) {
       toast.error("Erro ao carregar equipamentos");
-    } else {
-      setEquipment(data || []);
+      setEquipment([]);
+      setLoading(false);
+      return;
     }
+
+    let rows = (data || []) as Equipment[];
+
+    // Para roteadores, buscamos os chips vinculados para exibir Linha e permitir filtro
+    if (type === "router") {
+      const ids = Array.from(
+        new Set(rows.map((r) => (r as any).sim_card_id).filter(Boolean))
+      ) as string[];
+      if (ids.length > 0) {
+        const { data: sims } = await supabase
+          .from("sim_cards")
+          .select("id, phone_number, serial_number")
+          .in("id", ids);
+        const map = new Map((sims || []).map((s) => [s.id, s]));
+        rows = rows.map((r) => ({
+          ...r,
+          sim_card: map.get((r as any).sim_card_id) || null,
+        }));
+      }
+    }
+
+    setEquipment(rows);
     setLoading(false);
   }, [type]);
 
@@ -89,13 +112,14 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
 
   const isMonitor = type === "monitor";
   const isRouter = type === "router";
-  const hideAssetTag = isMonitor || isRouter;
 
   const filtered = equipment.filter((e) => {
     if (statusFilter !== "all" && e.status !== statusFilter) return false;
-    const q = search.toLowerCase();
+    const q = search.toLowerCase().trim();
     if (!q) return true;
     const responsible = (e.employees?.full_name || e.profiles?.full_name || "").toLowerCase();
+    const location = [e.location_branch, e.location_department, e.location_room]
+      .filter(Boolean).join(" ").toLowerCase();
     if (isMonitor) {
       return (
         (e.serial_number || "").toLowerCase().includes(q) ||
@@ -104,18 +128,31 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
         responsible.includes(q)
       );
     }
+    if (isRouter) {
+      return (
+        e.brand.toLowerCase().includes(q) ||
+        e.model.toLowerCase().includes(q) ||
+        (e.technology || "").toLowerCase().includes(q) ||
+        (e.sim_card?.phone_number || "").toLowerCase().includes(q) ||
+        (e.sim_card?.serial_number || "").toLowerCase().includes(q) ||
+        responsible.includes(q) ||
+        location.includes(q)
+      );
+    }
     return (
       e.brand.toLowerCase().includes(q) ||
       e.model.toLowerCase().includes(q) ||
       (e.serial_number || "").toLowerCase().includes(q) ||
       (e.service_tag || "").toLowerCase().includes(q) ||
       (e.asset_tag || "").toLowerCase().includes(q) ||
-      responsible.includes(q)
+      responsible.includes(q) ||
+      location.includes(q)
     );
   });
 
   const counts = {
     active: equipment.filter((e) => e.status === "active").length,
+    maintenance: equipment.filter((e) => e.status === "maintenance").length,
     inactive: equipment.filter((e) => e.status === "inactive").length,
     discarded: equipment.filter((e) => e.status === "discarded").length,
     total: equipment.length,
