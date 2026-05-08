@@ -22,7 +22,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { Tables, Enums } from "@/integrations/supabase/types";
 
-type Equipment = Tables<"equipment"> & { profiles?: { full_name: string } | null; employees?: { full_name: string } | null };
+type Equipment = Tables<"equipment"> & {
+  profiles?: { full_name: string } | null;
+  employees?: { full_name: string } | null;
+  sim_card?: { phone_number: string; serial_number: string } | null;
+};
 type EquipmentType = Enums<"equipment_type">;
 
 const statusLabels: Record<string, string> = {
