@@ -147,12 +147,35 @@ export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; o
         </DialogHeader>
         <div className="space-y-3 text-sm">
           <div className="grid grid-cols-2 gap-3">
-            <div><span className="text-muted-foreground">Nº Série:</span> {equipment.serial_number || "—"}</div>
-            <div><span className="text-muted-foreground">Patrimônio:</span> {equipment.asset_tag || "—"}</div>
+            <div><span className="text-muted-foreground">Tipo:</span> {equipment.type}</div>
             <div><span className="text-muted-foreground">Status:</span> <Badge variant="outline">{statusLabels[equipment.status]}</Badge></div>
-            <div><span className="text-muted-foreground">Processador:</span> {equipment.processor || "—"}</div>
-            <div><span className="text-muted-foreground">Nota Fiscal:</span> {equipment.invoice_number || "—"}</div>
-            <div><span className="text-muted-foreground">Data Compra:</span> {equipment.purchase_date ? new Date(equipment.purchase_date).toLocaleDateString("pt-BR") : "—"}</div>
+            <div><span className="text-muted-foreground">Nº Série:</span> {equipment.serial_number || "—"}</div>
+            {(equipment.type === "notebook" || equipment.type === "monitor") && (
+              <div><span className="text-muted-foreground">Service Tag:</span> {(equipment as any).service_tag || "—"}</div>
+            )}
+            {equipment.type !== "router" && equipment.type !== "monitor" && equipment.type !== "camera" && equipment.type !== "printer" && (
+              <div><span className="text-muted-foreground">Patrimônio:</span> {equipment.asset_tag || "—"}</div>
+            )}
+            {equipment.type === "notebook" && (
+              <div><span className="text-muted-foreground">Processador:</span> {equipment.processor || "—"}</div>
+            )}
+            {equipment.type === "camera" && (
+              <div><span className="text-muted-foreground">Tipo de câmera:</span> {(equipment as any).camera_type || "—"}</div>
+            )}
+            {equipment.type === "router" && (
+              <>
+                <div><span className="text-muted-foreground">Tecnologia:</span> {(equipment as any).technology || "—"}</div>
+                <div><span className="text-muted-foreground">Linha:</span> {simCardInfo?.phone_number || "—"}</div>
+                <div><span className="text-muted-foreground">Chip (Série):</span> {simCardInfo?.serial_number || "—"}</div>
+                <div><span className="text-muted-foreground">Operadora:</span> {simCardInfo?.carrier || "—"}</div>
+              </>
+            )}
+            {equipment.type !== "router" && equipment.type !== "camera" && (
+              <>
+                <div><span className="text-muted-foreground">Nota Fiscal:</span> {equipment.invoice_number || "—"}</div>
+                <div><span className="text-muted-foreground">Data Compra:</span> {equipment.purchase_date ? new Date(equipment.purchase_date).toLocaleDateString("pt-BR") : "—"}</div>
+              </>
+            )}
             <div className="col-span-2"><span className="text-muted-foreground">Localização:</span> {[equipment.location_branch, equipment.location_department, equipment.location_room].filter(Boolean).join(" / ") || "—"}</div>
           </div>
           {equipment.notes && (
