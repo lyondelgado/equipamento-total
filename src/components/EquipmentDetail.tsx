@@ -74,7 +74,20 @@ export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; o
   }, [equipment]);
 
   useEffect(() => {
-    if (open && equipment) fetchData();
+    if (open && equipment) {
+      fetchData();
+      const simId = (equipment as any).sim_card_id;
+      if (equipment.type === "router" && simId) {
+        supabase
+          .from("sim_cards")
+          .select("phone_number, serial_number, carrier")
+          .eq("id", simId)
+          .maybeSingle()
+          .then(({ data }) => setSimCardInfo(data || null));
+      } else {
+        setSimCardInfo(null);
+      }
+    }
   }, [open, equipment, fetchData]);
 
   const handleResolve = async (id: string) => {
