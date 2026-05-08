@@ -22,7 +22,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { Tables, Enums } from "@/integrations/supabase/types";
 
-type Equipment = Tables<"equipment"> & { profiles?: { full_name: string } | null; employees?: { full_name: string } | null };
+type Equipment = Tables<"equipment"> & {
+  profiles?: { full_name: string } | null;
+  employees?: { full_name: string } | null;
+  sim_card?: { phone_number: string; serial_number: string } | null;
+};
 type EquipmentType = Enums<"equipment_type">;
 
 const statusLabels: Record<string, string> = {
@@ -63,9 +67,32 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
       .order("created_at", { ascending: false });
     if (error) {
       toast.error("Erro ao carregar equipamentos");
-    } else {
-      setEquipment(data || []);
+      setEquipment([]);
+      setLoading(false);
+      return;
     }
+
+    let rows = (data || []) as Equipment[];
+
+    // Para roteadores, buscamos os chips vinculados para exibir Linha e permitir filtro
+    if (type === "router") {
+      const ids = Array.from(
+        new Set(rows.map((r) => (r as any).sim_card_id).filter(Boolean))
+      ) as string[];
+      if (ids.length > 0) {
+        const { data: sims } = await supabase
+          .from("sim_cards")
+          .select("id, phone_number, serial_number")
+          .in("id", ids);
+        const map = new Map((sims || []).map((s) => [s.id, s]));
+        rows = rows.map((r) => ({
+          ...r,
+          sim_card: map.get((r as any).sim_card_id) || null,
+        }));
+      }
+    }
+
+    setEquipment(rows);
     setLoading(false);
   }, [type]);
 
@@ -85,13 +112,14 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
 
   const isMonitor = type === "monitor";
   const isRouter = type === "router";
-  const hideAssetTag = isMonitor || isRouter;
 
   const filtered = equipment.filter((e) => {
     if (statusFilter !== "all" && e.status !== statusFilter) return false;
-    const q = search.toLowerCase();
+    const q = search.toLowerCase().trim();
     if (!q) return true;
     const responsible = (e.employees?.full_name || e.profiles?.full_name || "").toLowerCase();
+    const location = [e.location_branch, e.location_department, e.location_room]
+      .filter(Boolean).join(" ").toLowerCase();
     if (isMonitor) {
       return (
         (e.serial_number || "").toLowerCase().includes(q) ||
@@ -100,18 +128,31 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
         responsible.includes(q)
       );
     }
+    if (isRouter) {
+      return (
+        e.brand.toLowerCase().includes(q) ||
+        e.model.toLowerCase().includes(q) ||
+        (e.technology || "").toLowerCase().includes(q) ||
+        (e.sim_card?.phone_number || "").toLowerCase().includes(q) ||
+        (e.sim_card?.serial_number || "").toLowerCase().includes(q) ||
+        responsible.includes(q) ||
+        location.includes(q)
+      );
+    }
     return (
       e.brand.toLowerCase().includes(q) ||
       e.model.toLowerCase().includes(q) ||
       (e.serial_number || "").toLowerCase().includes(q) ||
       (e.service_tag || "").toLowerCase().includes(q) ||
       (e.asset_tag || "").toLowerCase().includes(q) ||
-      responsible.includes(q)
+      responsible.includes(q) ||
+      location.includes(q)
     );
   });
 
   const counts = {
     active: equipment.filter((e) => e.status === "active").length,
+    maintenance: equipment.filter((e) => e.status === "maintenance").length,
     inactive: equipment.filter((e) => e.status === "inactive").length,
     discarded: equipment.filter((e) => e.status === "discarded").length,
     total: equipment.length,
@@ -129,14 +170,21 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
         <CardContent>
           <div className="flex flex-wrap items-center gap-3 mb-3 text-sm">
             <span className="px-2 py-1 rounded-md bg-success/10 text-success font-medium">Ativos: {counts.active}</span>
+            <span className="px-2 py-1 rounded-md bg-warning/10 text-warning font-medium">Manutenção: {counts.maintenance}</span>
             <span className="px-2 py-1 rounded-md bg-destructive/10 text-destructive font-medium">Inativos: {counts.inactive}</span>
             <span className="px-2 py-1 rounded-md bg-muted text-muted-foreground font-medium">Descartados: {counts.discarded}</span>
             <span className="px-2 py-1 rounded-md bg-primary/10 text-primary font-medium">Total: {counts.total}</span>
           </div>
-          <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={isMonitor ? "Buscar por série, service tag, modelo ou responsável..." : "Buscar por marca, modelo, série, patrimônio ou responsável..."}
+              placeholder={
+                isMonitor
+                  ? "Buscar por série, service tag, modelo ou responsável..."
+                  : isRouter
+                    ? "Buscar por marca, modelo, tecnologia, linha, série do chip, responsável ou localização..."
+                    : "Buscar por marca, modelo, série, patrimônio, responsável ou localização..."
+              }
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="max-w-md"
@@ -154,6 +202,11 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
               </SelectContent>
             </Select>
           </div>
+          {(search || statusFilter !== "all") && !loading && (
+            <div className="text-xs text-muted-foreground mb-3">
+              Resultado: {filtered.length} de {equipment.length}
+            </div>
+          )}
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">Carregando...</div>
           ) : filtered.length === 0 ? (
@@ -166,7 +219,12 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Marca / Modelo</TableHead>
-                    {!isMonitor && <TableHead>Patrimônio</TableHead>}
+                    {isRouter && <TableHead>Tecnologia</TableHead>}
+                    {isRouter ? (
+                      <TableHead>Linha</TableHead>
+                    ) : !isMonitor ? (
+                      <TableHead>Patrimônio</TableHead>
+                    ) : null}
                     <TableHead>Status</TableHead>
                     <TableHead>Localização</TableHead>
                     <TableHead>Responsável</TableHead>
@@ -180,7 +238,12 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
                         <div className="font-medium">{item.brand}</div>
                         <div className="text-sm text-muted-foreground">{item.model}</div>
                       </TableCell>
-                      {!isMonitor && <TableCell>{item.asset_tag || "—"}</TableCell>}
+                      {isRouter && <TableCell>{item.technology || "—"}</TableCell>}
+                      {isRouter ? (
+                        <TableCell>{item.sim_card?.phone_number || "—"}</TableCell>
+                      ) : !isMonitor ? (
+                        <TableCell>{item.asset_tag || "—"}</TableCell>
+                      ) : null}
                       <TableCell>
                         <Badge className={statusColors[item.status] || ""}>
                           {statusLabels[item.status]}
