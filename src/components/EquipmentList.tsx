@@ -274,6 +274,24 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
               </Table>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      <EquipmentForm
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        onSaved={fetchEquipment}
+        equipmentType={type}
+        equipment={editing}
+      />
+
+      {viewing && (
+        <EquipmentDetail
+          open={!!viewing}
+          onClose={() => setViewing(null)}
+          equipment={viewing}
+        />
+      )}
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
