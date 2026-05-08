@@ -170,14 +170,21 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
         <CardContent>
           <div className="flex flex-wrap items-center gap-3 mb-3 text-sm">
             <span className="px-2 py-1 rounded-md bg-success/10 text-success font-medium">Ativos: {counts.active}</span>
+            <span className="px-2 py-1 rounded-md bg-warning/10 text-warning font-medium">Manutenção: {counts.maintenance}</span>
             <span className="px-2 py-1 rounded-md bg-destructive/10 text-destructive font-medium">Inativos: {counts.inactive}</span>
             <span className="px-2 py-1 rounded-md bg-muted text-muted-foreground font-medium">Descartados: {counts.discarded}</span>
             <span className="px-2 py-1 rounded-md bg-primary/10 text-primary font-medium">Total: {counts.total}</span>
           </div>
-          <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={isMonitor ? "Buscar por série, service tag, modelo ou responsável..." : "Buscar por marca, modelo, série, patrimônio ou responsável..."}
+              placeholder={
+                isMonitor
+                  ? "Buscar por série, service tag, modelo ou responsável..."
+                  : isRouter
+                    ? "Buscar por marca, modelo, tecnologia, linha, série do chip, responsável ou localização..."
+                    : "Buscar por marca, modelo, série, patrimônio, responsável ou localização..."
+              }
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="max-w-md"
@@ -195,6 +202,11 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
               </SelectContent>
             </Select>
           </div>
+          {(search || statusFilter !== "all") && !loading && (
+            <div className="text-xs text-muted-foreground mb-3">
+              Resultado: {filtered.length} de {equipment.length}
+            </div>
+          )}
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">Carregando...</div>
           ) : filtered.length === 0 ? (
@@ -207,7 +219,12 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Marca / Modelo</TableHead>
-                    {!isMonitor && <TableHead>Patrimônio</TableHead>}
+                    {isRouter && <TableHead>Tecnologia</TableHead>}
+                    {isRouter ? (
+                      <TableHead>Linha</TableHead>
+                    ) : !isMonitor ? (
+                      <TableHead>Patrimônio</TableHead>
+                    ) : null}
                     <TableHead>Status</TableHead>
                     <TableHead>Localização</TableHead>
                     <TableHead>Responsável</TableHead>
@@ -221,7 +238,12 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
                         <div className="font-medium">{item.brand}</div>
                         <div className="text-sm text-muted-foreground">{item.model}</div>
                       </TableCell>
-                      {!isMonitor && <TableCell>{item.asset_tag || "—"}</TableCell>}
+                      {isRouter && <TableCell>{item.technology || "—"}</TableCell>}
+                      {isRouter ? (
+                        <TableCell>{item.sim_card?.phone_number || "—"}</TableCell>
+                      ) : !isMonitor ? (
+                        <TableCell>{item.asset_tag || "—"}</TableCell>
+                      ) : null}
                       <TableCell>
                         <Badge className={statusColors[item.status] || ""}>
                           {statusLabels[item.status]}
@@ -252,24 +274,6 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
               </Table>
             </div>
           )}
-        </CardContent>
-      </Card>
-
-      <EquipmentForm
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        onSaved={fetchEquipment}
-        equipmentType={type}
-        equipment={editing}
-      />
-
-      {viewing && (
-        <EquipmentDetail
-          open={!!viewing}
-          onClose={() => setViewing(null)}
-          equipment={viewing}
-        />
-      )}
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
