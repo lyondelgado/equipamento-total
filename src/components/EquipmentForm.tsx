@@ -431,3 +431,100 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
   );
 }
 
+function ChipCombobox({
+  chips,
+  value,
+  onChange,
+}: {
+  chips: SimCard[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const selected = chips.find((c) => c.id === value);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className={cn(
+            "w-full justify-between font-normal",
+            selected && chips.find((c) => c.id === value)?.in_use && "border-success ring-1 ring-success"
+          )}
+        >
+          <span className="truncate">
+            {selected
+              ? `${selected.serial_number} — ${selected.carrier} (${formatPhone(selected.phone_number)})`
+              : "Nenhum"}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+        <Command
+          filter={(itemValue, search) => {
+            // itemValue is composed of serial + phone digits + carrier (lowercased)
+            const q = search.toLowerCase().replace(/\s+/g, "");
+            return itemValue.toLowerCase().includes(q) ? 1 : 0;
+          }}
+        >
+          <CommandInput placeholder="Buscar por serial ou número..." />
+          <CommandList>
+            <CommandEmpty>Nenhum chip encontrado.</CommandEmpty>
+            <CommandGroup>
+              <CommandItem
+                value="nenhum"
+                onSelect={() => {
+                  onChange("");
+                  setOpen(false);
+                }}
+              >
+                <Check className={cn("mr-2 h-4 w-4", !value ? "opacity-100" : "opacity-0")} />
+                Nenhum
+              </CommandItem>
+              {chips.map((c) => {
+                const phoneFmt = formatPhone(c.phone_number);
+                const phoneDigits = (c.phone_number || "").replace(/\D/g, "");
+                const itemValue = `${c.serial_number} ${phoneFmt} ${phoneDigits} ${c.carrier}`;
+                return (
+                  <CommandItem
+                    key={c.id}
+                    value={itemValue}
+                    onSelect={() => {
+                      onChange(c.id);
+                      setOpen(false);
+                    }}
+                    className={cn(
+                      "border border-transparent",
+                      c.in_use && "border-success/60"
+                    )}
+                  >
+                    <Check className={cn("mr-2 h-4 w-4", value === c.id ? "opacity-100" : "opacity-0")} />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-mono text-xs truncate">{c.serial_number || "(sem série)"}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {c.carrier} · {phoneFmt}
+                      </div>
+                    </div>
+                    <span
+                      className={cn(
+                        "ml-2 text-[10px] px-1.5 py-0.5 rounded font-medium",
+                        c.in_use ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"
+                      )}
+                    >
+                      {c.in_use ? "Em uso" : "Disponível"}
+                    </span>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
