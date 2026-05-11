@@ -284,17 +284,31 @@ function SimCardsPage() {
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="renewal">Dia de renovação do plano</Label>
-                  <Input
-                    id="renewal"
-                    type="number"
-                    min={1}
-                    max={31}
-                    value={renewalDay}
-                    onChange={(e) => setRenewalDay(e.target.value)}
-                    placeholder="Ex: 15 (todo dia 15 do mês)"
-                  />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="renewal">Dia de renovação do plano</Label>
+                    <Input
+                      id="renewal"
+                      type="number"
+                      min={1}
+                      max={31}
+                      value={renewalDay}
+                      onChange={(e) => setRenewalDay(e.target.value)}
+                      placeholder="Ex: 15"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="status">Status da linha</Label>
+                    <Select value={status} onValueChange={setStatus}>
+                      <SelectTrigger id="status">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Ativa</SelectItem>
+                        <SelectItem value="cancelled">Cancelada</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="notes">Observações</Label>
