@@ -10,6 +10,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { MaintenanceDialog } from "@/components/MaintenanceDialog";
 import { toast } from "sonner";
 import type { Tables, Enums } from "@/integrations/supabase/types";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { formatPhone } from "@/lib/phone";
 
 type Equipment = Tables<"equipment">;
 type EquipmentType = Enums<"equipment_type">;
@@ -34,6 +39,8 @@ interface SimCard {
   serial_number: string;
   phone_number: string;
   carrier: string;
+  status: string;
+  in_use: boolean;
 }
 
 interface EquipmentFormProps {
@@ -101,9 +108,26 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
         if (data) setEmployees(data as Employee[]);
       });
       if (isRouter) {
-        supabase.from("sim_cards").select("id, chip_id, serial_number, phone_number, carrier").order("chip_id").then(({ data }) => {
-          if (data) setSimCards(data as SimCard[]);
-        });
+        (async () => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const sb = supabase as any;
+          const [{ data: chipsData }, { data: usedData }] = await Promise.all([
+            sb.from("sim_cards").select("id, chip_id, serial_number, phone_number, carrier, status").order("chip_id"),
+            sb.from("equipment").select("id, sim_card_id").not("sim_card_id", "is", null),
+          ]);
+          const usedMap = new Map<string, string>();
+          (usedData || []).forEach((r: any) => { if (r.sim_card_id) usedMap.set(r.sim_card_id, r.id); });
+          const currentSimId = (equipment as any)?.sim_card_id || "";
+          const list = (chipsData || []).map((c: any) => ({
+            ...c,
+            in_use: !!usedMap.get(c.id) && usedMap.get(c.id) !== (equipment as any)?.id,
+          })) as SimCard[];
+          // hide cancelled (except the one currently selected, so we don't break the form)
+          const filtered = list.filter((c) => c.status !== "cancelled" || c.id === currentSimId);
+          // available first, then in use
+          filtered.sort((a, b) => Number(a.in_use) - Number(b.in_use) || a.chip_id - b.chip_id);
+          setSimCards(filtered);
+        })();
       }
       setPendingProblem(null);
       if (equipment) {
@@ -305,22 +329,16 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Chip</Label>
-                <Select value={simCardId || "__none__"} onValueChange={(v) => setSimCardId(v === "__none__" ? "" : v)}>
-                  <SelectTrigger><SelectValue placeholder="Nenhum" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">Nenhum</SelectItem>
-                    {simCards.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.serial_number} — {s.carrier} ({s.phone_number})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <ChipCombobox
+                  chips={simCards}
+                  value={simCardId}
+                  onChange={setSimCardId}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Linha</Label>
                 <Input
-                  value={simCards.find((s) => s.id === simCardId)?.phone_number || ""}
+                  value={formatPhone(simCards.find((s) => s.id === simCardId)?.phone_number || "")}
                   readOnly
                   disabled
                   placeholder="Selecione um chip"
@@ -410,6 +428,103 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
         onConfirm={handleMaintenanceConfirm}
       />
     </Dialog>
+  );
+}
+
+function ChipCombobox({
+  chips,
+  value,
+  onChange,
+}: {
+  chips: SimCard[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const selected = chips.find((c) => c.id === value);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className={cn(
+            "w-full justify-between font-normal",
+            selected && chips.find((c) => c.id === value)?.in_use && "border-success ring-1 ring-success"
+          )}
+        >
+          <span className="truncate">
+            {selected
+              ? `${selected.serial_number} — ${selected.carrier} (${formatPhone(selected.phone_number)})`
+              : "Nenhum"}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+        <Command
+          filter={(itemValue, search) => {
+            // itemValue is composed of serial + phone digits + carrier (lowercased)
+            const q = search.toLowerCase().replace(/\s+/g, "");
+            return itemValue.toLowerCase().includes(q) ? 1 : 0;
+          }}
+        >
+          <CommandInput placeholder="Buscar por serial ou número..." />
+          <CommandList>
+            <CommandEmpty>Nenhum chip encontrado.</CommandEmpty>
+            <CommandGroup>
+              <CommandItem
+                value="nenhum"
+                onSelect={() => {
+                  onChange("");
+                  setOpen(false);
+                }}
+              >
+                <Check className={cn("mr-2 h-4 w-4", !value ? "opacity-100" : "opacity-0")} />
+                Nenhum
+              </CommandItem>
+              {chips.map((c) => {
+                const phoneFmt = formatPhone(c.phone_number);
+                const phoneDigits = (c.phone_number || "").replace(/\D/g, "");
+                const itemValue = `${c.serial_number} ${phoneFmt} ${phoneDigits} ${c.carrier}`;
+                return (
+                  <CommandItem
+                    key={c.id}
+                    value={itemValue}
+                    onSelect={() => {
+                      onChange(c.id);
+                      setOpen(false);
+                    }}
+                    className={cn(
+                      "border border-transparent",
+                      c.in_use && "border-success/60"
+                    )}
+                  >
+                    <Check className={cn("mr-2 h-4 w-4", value === c.id ? "opacity-100" : "opacity-0")} />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-mono text-xs truncate">{c.serial_number || "(sem série)"}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {c.carrier} · {phoneFmt}
+                      </div>
+                    </div>
+                    <span
+                      className={cn(
+                        "ml-2 text-[10px] px-1.5 py-0.5 rounded font-medium",
+                        c.in_use ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"
+                      )}
+                    >
+                      {c.in_use ? "Em uso" : "Disponível"}
+                    </span>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
 

@@ -59,6 +59,8 @@ type SimCardRow = {
   plan_limit: string;
   renewal_day: number | null;
   notes: string | null;
+  status: string;
+  in_use?: boolean;
 };
 
 const CARRIERS = ["Vivo", "Claro", "TIM", "Oi", "Algar", "Sercomtel", "Nextel", "Outra"];
@@ -89,6 +91,7 @@ function SimCardsPage() {
   const [planLimit, setPlanLimit] = useState("");
   const [renewalDay, setRenewalDay] = useState<string>("");
   const [notes, setNotes] = useState("");
+  const [status, setStatus] = useState<string>("active");
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -100,15 +103,17 @@ function SimCardsPage() {
 
   async function fetchChips() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
-      .from("sim_cards")
-      .select("*")
-      .order("chip_id", { ascending: true });
+    const sb = supabase as any;
+    const [{ data, error }, { data: usedData }] = await Promise.all([
+      sb.from("sim_cards").select("*").order("chip_id", { ascending: true }),
+      sb.from("equipment").select("sim_card_id").not("sim_card_id", "is", null),
+    ]);
     if (error) {
       toast.error("Erro ao carregar chips");
       return;
     }
-    setChips((data as SimCardRow[]) || []);
+    const usedIds = new Set<string>((usedData || []).map((r: any) => r.sim_card_id));
+    setChips(((data as SimCardRow[]) || []).map((c) => ({ ...c, in_use: usedIds.has(c.id) })));
   }
 
   function resetForm() {
@@ -119,6 +124,7 @@ function SimCardsPage() {
     setPlanLimit("");
     setRenewalDay("");
     setNotes("");
+    setStatus("active");
   }
 
   function openNew() {
@@ -134,6 +140,7 @@ function SimCardsPage() {
     setPlanLimit(chip.plan_limit);
     setRenewalDay(chip.renewal_day ? String(chip.renewal_day) : "");
     setNotes(chip.notes || "");
+    setStatus(chip.status || "active");
     setOpen(true);
   }
 
@@ -160,6 +167,7 @@ function SimCardsPage() {
       plan_limit: planLimit.trim(),
       renewal_day: renewal,
       notes: notes.trim(),
+      status,
       created_by: user?.id ?? null,
     };
 
@@ -276,17 +284,31 @@ function SimCardsPage() {
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="renewal">Dia de renovação do plano</Label>
-                  <Input
-                    id="renewal"
-                    type="number"
-                    min={1}
-                    max={31}
-                    value={renewalDay}
-                    onChange={(e) => setRenewalDay(e.target.value)}
-                    placeholder="Ex: 15 (todo dia 15 do mês)"
-                  />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="renewal">Dia de renovação do plano</Label>
+                    <Input
+                      id="renewal"
+                      type="number"
+                      min={1}
+                      max={31}
+                      value={renewalDay}
+                      onChange={(e) => setRenewalDay(e.target.value)}
+                      placeholder="Ex: 15"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="status">Status da linha</Label>
+                    <Select value={status} onValueChange={setStatus}>
+                      <SelectTrigger id="status">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Ativa</SelectItem>
+                        <SelectItem value="cancelled">Cancelada</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="notes">Observações</Label>
@@ -337,13 +359,15 @@ function SimCardsPage() {
                     <TableHead>Operadora</TableHead>
                     <TableHead>Plano</TableHead>
                     <TableHead>Renovação</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Uso</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                         Nenhum chip cadastrado
                       </TableCell>
                     </TableRow>
@@ -359,6 +383,16 @@ function SimCardsPage() {
                         <TableCell>{c.plan_limit || "—"}</TableCell>
                         <TableCell>
                           {c.renewal_day ? `Dia ${c.renewal_day}` : "—"}
+                        </TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${c.status === "cancelled" ? "bg-destructive/10 text-destructive" : "bg-success/10 text-success"}`}>
+                            {c.status === "cancelled" ? "Cancelada" : "Ativa"}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${c.in_use ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                            {c.in_use ? "Em Uso" : "Disponível"}
+                          </span>
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">

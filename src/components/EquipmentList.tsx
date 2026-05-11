@@ -22,10 +22,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { Tables, Enums } from "@/integrations/supabase/types";
 
+import { formatPhone } from "@/lib/phone";
+
 type Equipment = Tables<"equipment"> & {
   profiles?: { full_name: string } | null;
   employees?: { full_name: string } | null;
-  sim_card?: { phone_number: string; serial_number: string } | null;
+  sim_card?: { phone_number: string; serial_number: string; plan_limit: string } | null;
 };
 type EquipmentType = Enums<"equipment_type">;
 
@@ -82,7 +84,7 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
       if (ids.length > 0) {
         const { data: sims } = await supabase
           .from("sim_cards")
-          .select("id, phone_number, serial_number")
+          .select("id, phone_number, serial_number, plan_limit")
           .in("id", ids);
         const map = new Map((sims || []).map((s) => [s.id, s]));
         rows = rows.map((r) => ({
@@ -129,13 +131,18 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
       );
     }
     if (isRouter) {
+      const phoneDigits = (e.sim_card?.phone_number || "").replace(/\D/g, "");
+      const phoneFmt = formatPhone(e.sim_card?.phone_number || "").toLowerCase();
+      const qDigits = q.replace(/\D/g, "");
       return (
         e.brand.toLowerCase().includes(q) ||
         e.model.toLowerCase().includes(q) ||
+        (e.serial_number || "").toLowerCase().includes(q) ||
         (e.technology || "").toLowerCase().includes(q) ||
-        (e.sim_card?.phone_number || "").toLowerCase().includes(q) ||
         (e.sim_card?.serial_number || "").toLowerCase().includes(q) ||
-        responsible.includes(q) ||
+        (e.sim_card?.plan_limit || "").toLowerCase().includes(q) ||
+        phoneFmt.includes(q) ||
+        (qDigits.length > 0 && phoneDigits.includes(qDigits)) ||
         location.includes(q)
       );
     }
@@ -182,7 +189,7 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
                 isMonitor
                   ? "Buscar por série, service tag, modelo ou responsável..."
                   : isRouter
-                    ? "Buscar por marca, modelo, tecnologia, linha, série do chip, responsável ou localização..."
+                    ? "Buscar por marca, modelo, série, tecnologia, linha, série do chip ou plano..."
                     : "Buscar por marca, modelo, série, patrimônio, responsável ou localização..."
               }
               value={search}
@@ -221,13 +228,20 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
                     <TableHead>Marca / Modelo</TableHead>
                     {isRouter && <TableHead>Tecnologia</TableHead>}
                     {isRouter ? (
-                      <TableHead>Linha</TableHead>
+                      <>
+                        <TableHead>Linha</TableHead>
+                        <TableHead>Plano</TableHead>
+                      </>
                     ) : !isMonitor ? (
                       <TableHead>Patrimônio</TableHead>
                     ) : null}
                     <TableHead>Status</TableHead>
                     <TableHead>Localização</TableHead>
-                    <TableHead>Responsável</TableHead>
+                    {isRouter ? (
+                      <TableHead>Serial do Roteador</TableHead>
+                    ) : (
+                      <TableHead>Responsável</TableHead>
+                    )}
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -240,7 +254,10 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
                       </TableCell>
                       {isRouter && <TableCell>{item.technology || "—"}</TableCell>}
                       {isRouter ? (
-                        <TableCell>{item.sim_card?.phone_number || "—"}</TableCell>
+                        <>
+                          <TableCell>{formatPhone(item.sim_card?.phone_number || "") || "—"}</TableCell>
+                          <TableCell>{item.sim_card?.plan_limit || "—"}</TableCell>
+                        </>
                       ) : !isMonitor ? (
                         <TableCell>{item.asset_tag || "—"}</TableCell>
                       ) : null}
@@ -254,7 +271,11 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
                           {[item.location_branch, item.location_department, item.location_room].filter(Boolean).join(" / ") || "—"}
                         </div>
                       </TableCell>
-                      <TableCell>{item.employees?.full_name || item.profiles?.full_name || "—"}</TableCell>
+                      {isRouter ? (
+                        <TableCell className="font-mono text-xs">{item.serial_number || "—"}</TableCell>
+                      ) : (
+                        <TableCell>{item.employees?.full_name || item.profiles?.full_name || "—"}</TableCell>
+                      )}
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
                           <Button variant="ghost" size="icon" onClick={() => setViewing(item)}>

@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowRight, Wrench, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
+import { formatPhone } from "@/lib/phone";
 
 type Equipment = Tables<"equipment">;
 
@@ -39,7 +40,7 @@ const statusLabels: Record<string, string> = {
 };
 
 export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; onClose: () => void; equipment: Equipment }) {
-  const [simCardInfo, setSimCardInfo] = useState<{ phone_number: string; serial_number: string; carrier: string } | null>(null);
+  const [simCardInfo, setSimCardInfo] = useState<{ phone_number: string; serial_number: string; carrier: string; plan_limit: string } | null>(null);
   const [movements, setMovements] = useState<Movement[]>([]);
   const [maintenances, setMaintenances] = useState<Maintenance[]>([]);
   const [resolvingId, setResolvingId] = useState<string | null>(null);
@@ -80,7 +81,7 @@ export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; o
       if (equipment.type === "router" && simId) {
         supabase
           .from("sim_cards")
-          .select("phone_number, serial_number, carrier")
+          .select("phone_number, serial_number, carrier, plan_limit")
           .eq("id", simId)
           .maybeSingle()
           .then(({ data }) => setSimCardInfo(data || null));
@@ -165,9 +166,10 @@ export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; o
             {equipment.type === "router" && (
               <>
                 <div><span className="text-muted-foreground">Tecnologia:</span> {(equipment as any).technology || "—"}</div>
-                <div><span className="text-muted-foreground">Linha:</span> {simCardInfo?.phone_number || "—"}</div>
+                <div><span className="text-muted-foreground">Linha:</span> {formatPhone(simCardInfo?.phone_number || "") || "—"}</div>
                 <div><span className="text-muted-foreground">Chip (Série):</span> {simCardInfo?.serial_number || "—"}</div>
                 <div><span className="text-muted-foreground">Operadora:</span> {simCardInfo?.carrier || "—"}</div>
+                <div><span className="text-muted-foreground">Plano:</span> {simCardInfo?.plan_limit || "—"}</div>
               </>
             )}
             {equipment.type !== "router" && equipment.type !== "camera" && (
