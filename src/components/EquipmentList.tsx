@@ -84,7 +84,7 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
       if (ids.length > 0) {
         const { data: sims } = await supabase
           .from("sim_cards")
-          .select("id, phone_number, serial_number")
+          .select("id, phone_number, serial_number, plan_limit")
           .in("id", ids);
         const map = new Map((sims || []).map((s) => [s.id, s]));
         rows = rows.map((r) => ({
