@@ -166,9 +166,10 @@ export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; o
             {equipment.type === "router" && (
               <>
                 <div><span className="text-muted-foreground">Tecnologia:</span> {(equipment as any).technology || "—"}</div>
-                <div><span className="text-muted-foreground">Linha:</span> {simCardInfo?.phone_number || "—"}</div>
+                <div><span className="text-muted-foreground">Linha:</span> {formatPhone(simCardInfo?.phone_number || "") || "—"}</div>
                 <div><span className="text-muted-foreground">Chip (Série):</span> {simCardInfo?.serial_number || "—"}</div>
                 <div><span className="text-muted-foreground">Operadora:</span> {simCardInfo?.carrier || "—"}</div>
+                <div><span className="text-muted-foreground">Plano:</span> {simCardInfo?.plan_limit || "—"}</div>
               </>
             )}
             {equipment.type !== "router" && equipment.type !== "camera" && (
