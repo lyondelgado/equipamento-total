@@ -131,13 +131,18 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
       );
     }
     if (isRouter) {
+      const phoneDigits = (e.sim_card?.phone_number || "").replace(/\D/g, "");
+      const phoneFmt = formatPhone(e.sim_card?.phone_number || "").toLowerCase();
+      const qDigits = q.replace(/\D/g, "");
       return (
         e.brand.toLowerCase().includes(q) ||
         e.model.toLowerCase().includes(q) ||
+        (e.serial_number || "").toLowerCase().includes(q) ||
         (e.technology || "").toLowerCase().includes(q) ||
-        (e.sim_card?.phone_number || "").toLowerCase().includes(q) ||
         (e.sim_card?.serial_number || "").toLowerCase().includes(q) ||
-        responsible.includes(q) ||
+        (e.sim_card?.plan_limit || "").toLowerCase().includes(q) ||
+        phoneFmt.includes(q) ||
+        (qDigits.length > 0 && phoneDigits.includes(qDigits)) ||
         location.includes(q)
       );
     }
