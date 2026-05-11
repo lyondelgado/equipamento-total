@@ -329,22 +329,16 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Chip</Label>
-                <Select value={simCardId || "__none__"} onValueChange={(v) => setSimCardId(v === "__none__" ? "" : v)}>
-                  <SelectTrigger><SelectValue placeholder="Nenhum" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">Nenhum</SelectItem>
-                    {simCards.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.serial_number} — {s.carrier} ({s.phone_number})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <ChipCombobox
+                  chips={simCards}
+                  value={simCardId}
+                  onChange={setSimCardId}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Linha</Label>
                 <Input
-                  value={simCards.find((s) => s.id === simCardId)?.phone_number || ""}
+                  value={formatPhone(simCards.find((s) => s.id === simCardId)?.phone_number || "")}
                   readOnly
                   disabled
                   placeholder="Selecione um chip"
