@@ -39,6 +39,8 @@ interface SimCard {
   serial_number: string;
   phone_number: string;
   carrier: string;
+  status: string;
+  in_use: boolean;
 }
 
 interface EquipmentFormProps {
