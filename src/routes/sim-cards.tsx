@@ -167,6 +167,7 @@ function SimCardsPage() {
       plan_limit: planLimit.trim(),
       renewal_day: renewal,
       notes: notes.trim(),
+      status,
       created_by: user?.id ?? null,
     };
 
