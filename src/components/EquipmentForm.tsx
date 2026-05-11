@@ -108,9 +108,26 @@ export function EquipmentForm({ open, onClose, onSaved, equipmentType, equipment
         if (data) setEmployees(data as Employee[]);
       });
       if (isRouter) {
-        supabase.from("sim_cards").select("id, chip_id, serial_number, phone_number, carrier").order("chip_id").then(({ data }) => {
-          if (data) setSimCards(data as SimCard[]);
-        });
+        (async () => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const sb = supabase as any;
+          const [{ data: chipsData }, { data: usedData }] = await Promise.all([
+            sb.from("sim_cards").select("id, chip_id, serial_number, phone_number, carrier, status").order("chip_id"),
+            sb.from("equipment").select("id, sim_card_id").not("sim_card_id", "is", null),
+          ]);
+          const usedMap = new Map<string, string>();
+          (usedData || []).forEach((r: any) => { if (r.sim_card_id) usedMap.set(r.sim_card_id, r.id); });
+          const currentSimId = (equipment as any)?.sim_card_id || "";
+          const list = (chipsData || []).map((c: any) => ({
+            ...c,
+            in_use: !!usedMap.get(c.id) && usedMap.get(c.id) !== (equipment as any)?.id,
+          })) as SimCard[];
+          // hide cancelled (except the one currently selected, so we don't break the form)
+          const filtered = list.filter((c) => c.status !== "cancelled" || c.id === currentSimId);
+          // available first, then in use
+          filtered.sort((a, b) => Number(a.in_use) - Number(b.in_use) || a.chip_id - b.chip_id);
+          setSimCards(filtered);
+        })();
       }
       setPendingProblem(null);
       if (equipment) {
