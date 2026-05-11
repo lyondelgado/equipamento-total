@@ -91,6 +91,7 @@ function SimCardsPage() {
   const [planLimit, setPlanLimit] = useState("");
   const [renewalDay, setRenewalDay] = useState<string>("");
   const [notes, setNotes] = useState("");
+  const [status, setStatus] = useState<string>("active");
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
