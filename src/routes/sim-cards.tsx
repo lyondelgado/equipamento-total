@@ -140,6 +140,7 @@ function SimCardsPage() {
     setPlanLimit(chip.plan_limit);
     setRenewalDay(chip.renewal_day ? String(chip.renewal_day) : "");
     setNotes(chip.notes || "");
+    setStatus(chip.status || "active");
     setOpen(true);
   }
 
