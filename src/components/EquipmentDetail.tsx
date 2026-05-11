@@ -40,7 +40,7 @@ const statusLabels: Record<string, string> = {
 };
 
 export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; onClose: () => void; equipment: Equipment }) {
-  const [simCardInfo, setSimCardInfo] = useState<{ phone_number: string; serial_number: string; carrier: string } | null>(null);
+  const [simCardInfo, setSimCardInfo] = useState<{ phone_number: string; serial_number: string; carrier: string; plan_limit: string } | null>(null);
   const [movements, setMovements] = useState<Movement[]>([]);
   const [maintenances, setMaintenances] = useState<Maintenance[]>([]);
   const [resolvingId, setResolvingId] = useState<string | null>(null);
