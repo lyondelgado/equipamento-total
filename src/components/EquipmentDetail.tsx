@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowRight, Wrench, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
+import { formatPhone } from "@/lib/phone";
 
 type Equipment = Tables<"equipment">;
 
