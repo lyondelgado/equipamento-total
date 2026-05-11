@@ -81,7 +81,7 @@ export function EquipmentDetail({ open, onClose, equipment }: { open: boolean; o
       if (equipment.type === "router" && simId) {
         supabase
           .from("sim_cards")
-          .select("phone_number, serial_number, carrier")
+          .select("phone_number, serial_number, carrier, plan_limit")
           .eq("id", simId)
           .maybeSingle()
           .then(({ data }) => setSimCardInfo(data || null));
