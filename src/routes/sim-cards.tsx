@@ -124,6 +124,7 @@ function SimCardsPage() {
     setPlanLimit("");
     setRenewalDay("");
     setNotes("");
+    setStatus("active");
   }
 
   function openNew() {
