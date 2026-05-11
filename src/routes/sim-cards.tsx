@@ -103,15 +103,17 @@ function SimCardsPage() {
 
   async function fetchChips() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
-      .from("sim_cards")
-      .select("*")
-      .order("chip_id", { ascending: true });
+    const sb = supabase as any;
+    const [{ data, error }, { data: usedData }] = await Promise.all([
+      sb.from("sim_cards").select("*").order("chip_id", { ascending: true }),
+      sb.from("equipment").select("sim_card_id").not("sim_card_id", "is", null),
+    ]);
     if (error) {
       toast.error("Erro ao carregar chips");
       return;
     }
-    setChips((data as SimCardRow[]) || []);
+    const usedIds = new Set<string>((usedData || []).map((r: any) => r.sim_card_id));
+    setChips(((data as SimCardRow[]) || []).map((c) => ({ ...c, in_use: usedIds.has(c.id) })));
   }
 
   function resetForm() {
