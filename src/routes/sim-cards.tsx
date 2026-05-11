@@ -59,6 +59,8 @@ type SimCardRow = {
   plan_limit: string;
   renewal_day: number | null;
   notes: string | null;
+  status: string;
+  in_use?: boolean;
 };
 
 const CARRIERS = ["Vivo", "Claro", "TIM", "Oi", "Algar", "Sercomtel", "Nextel", "Outra"];
