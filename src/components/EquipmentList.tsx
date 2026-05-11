@@ -228,13 +228,20 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
                     <TableHead>Marca / Modelo</TableHead>
                     {isRouter && <TableHead>Tecnologia</TableHead>}
                     {isRouter ? (
-                      <TableHead>Linha</TableHead>
+                      <>
+                        <TableHead>Linha</TableHead>
+                        <TableHead>Plano</TableHead>
+                      </>
                     ) : !isMonitor ? (
                       <TableHead>Patrimônio</TableHead>
                     ) : null}
                     <TableHead>Status</TableHead>
                     <TableHead>Localização</TableHead>
-                    <TableHead>Responsável</TableHead>
+                    {isRouter ? (
+                      <TableHead>Serial do Roteador</TableHead>
+                    ) : (
+                      <TableHead>Responsável</TableHead>
+                    )}
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -247,7 +254,10 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
                       </TableCell>
                       {isRouter && <TableCell>{item.technology || "—"}</TableCell>}
                       {isRouter ? (
-                        <TableCell>{item.sim_card?.phone_number || "—"}</TableCell>
+                        <>
+                          <TableCell>{formatPhone(item.sim_card?.phone_number || "") || "—"}</TableCell>
+                          <TableCell>{item.sim_card?.plan_limit || "—"}</TableCell>
+                        </>
                       ) : !isMonitor ? (
                         <TableCell>{item.asset_tag || "—"}</TableCell>
                       ) : null}
@@ -261,7 +271,11 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
                           {[item.location_branch, item.location_department, item.location_room].filter(Boolean).join(" / ") || "—"}
                         </div>
                       </TableCell>
-                      <TableCell>{item.employees?.full_name || item.profiles?.full_name || "—"}</TableCell>
+                      {isRouter ? (
+                        <TableCell className="font-mono text-xs">{item.serial_number || "—"}</TableCell>
+                      ) : (
+                        <TableCell>{item.employees?.full_name || item.profiles?.full_name || "—"}</TableCell>
+                      )}
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
                           <Button variant="ghost" size="icon" onClick={() => setViewing(item)}>
