@@ -10,6 +10,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { MaintenanceDialog } from "@/components/MaintenanceDialog";
 import { toast } from "sonner";
 import type { Tables, Enums } from "@/integrations/supabase/types";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { formatPhone } from "@/lib/phone";
 
 type Equipment = Tables<"equipment">;
 type EquipmentType = Enums<"equipment_type">;
