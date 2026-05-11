@@ -189,7 +189,7 @@ export function EquipmentList({ type, title }: EquipmentListProps) {
                 isMonitor
                   ? "Buscar por série, service tag, modelo ou responsável..."
                   : isRouter
-                    ? "Buscar por marca, modelo, tecnologia, linha, série do chip, responsável ou localização..."
+                    ? "Buscar por marca, modelo, série, tecnologia, linha, série do chip ou plano..."
                     : "Buscar por marca, modelo, série, patrimônio, responsável ou localização..."
               }
               value={search}
