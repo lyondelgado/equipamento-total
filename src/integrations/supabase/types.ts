@@ -338,6 +338,7 @@ export type Database = {
           plan_limit: string
           renewal_day: number | null
           serial_number: string
+          status: string
           updated_at: string
         }
         Insert: {
@@ -351,6 +352,7 @@ export type Database = {
           plan_limit?: string
           renewal_day?: number | null
           serial_number?: string
+          status?: string
           updated_at?: string
         }
         Update: {
@@ -364,6 +366,7 @@ export type Database = {
           plan_limit?: string
           renewal_day?: number | null
           serial_number?: string
+          status?: string
           updated_at?: string
         }
         Relationships: []
