@@ -359,13 +359,15 @@ function SimCardsPage() {
                     <TableHead>Operadora</TableHead>
                     <TableHead>Plano</TableHead>
                     <TableHead>Renovação</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Uso</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                         Nenhum chip cadastrado
                       </TableCell>
                     </TableRow>
@@ -381,6 +383,16 @@ function SimCardsPage() {
                         <TableCell>{c.plan_limit || "—"}</TableCell>
                         <TableCell>
                           {c.renewal_day ? `Dia ${c.renewal_day}` : "—"}
+                        </TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${c.status === "cancelled" ? "bg-destructive/10 text-destructive" : "bg-success/10 text-success"}`}>
+                            {c.status === "cancelled" ? "Cancelada" : "Ativa"}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${c.in_use ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                            {c.in_use ? "Em Uso" : "Disponível"}
+                          </span>
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">
